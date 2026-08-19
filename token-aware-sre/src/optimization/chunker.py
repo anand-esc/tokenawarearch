@@ -2,27 +2,51 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 import logging
 
 class LogChunker:
+    """Semantically chunks massive raw logs into safely overlapping blocks.
+    
+    This prevents contextual tearing (e.g., splitting a stack trace in half) 
+    by prioritizing double newlines, then single newlines, then spaces.
+
+    Attributes:
+        logger (logging.Logger): Logger for the chunker.
+        splitter (RecursiveCharacterTextSplitter): The LangChain text splitter instance.
+    """
     def __init__(self, chunk_size=1000, chunk_overlap=150):
         self.logger = logging.getLogger(__name__)
-        # The Recursive text splitter is ideal for logs. It tries to split on double newlines, 
-        # then single newlines, then spaces, keeping stack traces together as much as possible.
-        self.splitter = RecursiveCharacterTextSplitter(
-            chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap,
-            length_function=len,
-            is_separator_regex=False,
-        )
+        try:
+            self.splitter = RecursiveCharacterTextSplitter(
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
+                length_function=len,
+                is_separator_regex=False,
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to initialize LogChunker: {e}")
+            self.splitter = None
 
     def chunk_log(self, text: str) -> list:
-        """
-        Breaks massive stack traces into safely overlapping blocks.
+        """Splits a large string into a list of smaller strings.
+
+        Args:
+            text (str): The massive raw log string.
+
+        Returns:
+            list: A list of string chunks. Returns a list with the original text if chunking fails.
         """
         if not text:
             return []
             
-        chunks = self.splitter.split_text(text)
-        self.logger.info(f"Split raw log into {len(chunks)} chunks.")
-        return chunks
+        if not self.splitter:
+            self.logger.warning("Splitter not initialized. Returning raw text as single chunk.")
+            return [text]
+            
+        try:
+            chunks = self.splitter.split_text(text)
+            self.logger.info(f"Split raw log into {len(chunks)} chunks.")
+            return chunks
+        except Exception as e:
+            self.logger.error(f"Chunking failed: {e}")
+            return [text]
 
 if __name__ == "__main__":
     chunker = LogChunker(chunk_size=50, chunk_overlap=10)

@@ -2,14 +2,18 @@ import logging
 from transformers import pipeline
 
 class IncidentClassifier:
-    """
-    Analyzes compressed incident payloads to score Severity and Complexity.
-    Uses zero-shot classification to avoid external API costs.
+    """Evaluates incident payloads to score Severity and Complexity locally.
+    
+    Uses zero-shot classification via a fast local model (`cross-encoder/nli-distilroberta-base`) 
+    to triage the incident without spending any external API budget.
+
+    Attributes:
+        logger (logging.Logger): Logger for the classifier.
+        classifier (pipeline): HuggingFace zero-shot classification pipeline.
     """
     def __init__(self, model_name="cross-encoder/nli-distilroberta-base"):
         self.logger = logging.getLogger(__name__)
         self.logger.info(f"Loading local classification model: {model_name}")
-        # Using a fast model for zero-shot classification to evaluate incident text
         try:
             self.classifier = pipeline("zero-shot-classification", model=model_name)
         except Exception as e:
@@ -17,13 +21,19 @@ class IncidentClassifier:
             self.classifier = None
 
     def classify(self, payload: str) -> dict:
-        """
-        Returns a dictionary with 'severity' (1-10) and 'complexity' (1-10).
+        """Classifies the compressed incident payload.
+
+        Args:
+            payload (str): The compressed incident text from Phase 1.
+
+        Returns:
+            dict: A dictionary containing integer scores (1-10) for 'severity' and 'complexity', 
+                  as well as the primary labels that matched.
         """
         if not payload or not self.classifier:
-            return {"severity": 5, "complexity": 5} # Fallback defaults
+            self.logger.warning("Classifier not loaded or payload empty. Returning defaults.")
+            return {"severity": 5, "complexity": 5}
 
-        # Define labels to gauge severity
         severity_labels = [
             "critical system failure", 
             "high impact outage", 
@@ -31,7 +41,7 @@ class IncidentClassifier:
             "low priority warning", 
             "informational"
         ]
-        # Define labels to gauge complexity
+        
         complexity_labels = [
             "requires deep debugging across multiple services", 
             "requires moderate investigation", 
@@ -54,10 +64,11 @@ class IncidentClassifier:
             }
 
         except Exception as e:
-            self.logger.error(f"Classification failed: {e}")
+            self.logger.error(f"Classification failed during inference: {e}")
             return {"severity": 5, "complexity": 5}
 
     def _map_to_score(self, label: str, category: str) -> int:
+        """Maps a textual classification label to a numerical score (1-10)."""
         if category == "severity":
             mapping = {
                 "critical system failure": 10,

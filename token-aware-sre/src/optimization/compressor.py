@@ -5,12 +5,23 @@ except ImportError:
     PromptCompressor = None
 
 class LogCompressor:
+    """Uses LLMLingua to compress the final context payload before routing.
+    
+    This component removes stopwords and semantically irrelevant tokens while 
+    preserving the core meaning of the incident, often achieving 2x-3x 
+    compression ratios to drastically save on API costs.
+
+    Attributes:
+        logger (logging.Logger): Logger for the compressor.
+        compressor (PromptCompressor): LLMLingua compressor instance.
+    """
     def __init__(self, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0"):
         self.logger = logging.getLogger(__name__)
         self.logger.info("Initializing LLMLingua prompt compressor...")
-        # We use TinyLlama for fast, local compression. It requires minimal VRAM.
+        
         try:
             if PromptCompressor:
+                # We use TinyLlama for fast, local compression. It requires minimal VRAM.
                 self.compressor = PromptCompressor(
                     model_name=model_name,
                     device_map="auto"
@@ -23,9 +34,13 @@ class LogCompressor:
             self.compressor = None
 
     def compress(self, context: str) -> str:
-        """
-        Compresses the final context payload before sending to Phase 2 (Router).
-        Removes stopwords and irrelevant tokens while preserving semantics.
+        """Compresses the context payload.
+
+        Args:
+            context (str): The pruned, assembled log and chat history string.
+
+        Returns:
+            str: The highly compressed text prompt ready for the Phase 2 router.
         """
         if not context or len(context) < 200:
             return context
@@ -35,7 +50,6 @@ class LogCompressor:
             return context
             
         try:
-            # We target a 2x-3x compression ratio to save API budget
             results = self.compressor.compress_prompt(
                 context,
                 instruction="Extract the critical error details and context.",
@@ -54,8 +68,8 @@ class LogCompressor:
             
             return compressed_prompt
         except Exception as e:
-            self.logger.error(f"Compression failed: {e}")
-            return context
+            self.logger.error(f"Compression failed during inference: {e}")
+            return context # Graceful fallback
 
 if __name__ == "__main__":
     compressor = LogCompressor()
