@@ -19,13 +19,13 @@ class MockExecutor:
         
         if assessment.get("is_safe"):
             self.logger.info("Auto-Remediation triggered.")
-            print("🟢 [MOCK EXECUTION] Safe to proceed. The AI would have executed:")
+            print("[MOCK EXECUTION] Safe to proceed. The AI would have executed:")
             print(f"> {proposed_fix}")
             print("Status: 200 OK (Simulated Success)")
             return "SUCCESS"
         else:
             self.logger.warning("Auto-Remediation aborted. Routing to SRE Dashboard.")
-            print("🔴 [SRE DASHBOARD] Execution aborted due to high risk.")
+            print("[SRE DASHBOARD] Execution aborted due to high risk.")
             print(f"Reason: {assessment.get('reason')}")
             print(f"Risk Score: {assessment.get('risk_score')}/100")
             print("The following code requires human review:")
