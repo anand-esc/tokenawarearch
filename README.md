@@ -44,8 +44,15 @@ This phase handles the actual troubleshooting and remediation.
 
 This phase handles the Reinforcement Learning aspect.
 -   LLM as a Judge: A highly capable LLM reviews the full incident resolution flow and scores the performance.
--   Reinforcement Learning: Generates a reward or penalty based on resolution time, accuracy, and cost.
--   Policy Weight Updates: The RL system feeds these updates back into the Global Dynamic Routing node in Phase 2. This continuous feedback loop teaches the Global Router which incidents can be safely handled by cheaper local SLMs in the future, optimizing long-term costs.
+-   Tabular Q-Learning: Generates a reward or penalty based on resolution time, accuracy, and cost.
+-   Policy Weight Updates: The Q-Table updates dynamically. This continuous feedback loop teaches the Global Router which incidents can be safely handled by cheaper local SLMs in the future, optimizing long-term costs.
+
+### Phase 5: Continuous Training & Fine-Tuning
+
+To increase the baseline accuracy of the models over time, the system incorporates Domain-Specific Fine-Tuning.
+-   Synthetic Data Generation: Uses massive frontier LLMs (via Knowledge Distillation) to generate thousands of realistic incident logs and bash remediations.
+-   QLoRA Fine-Tuning: The generated dataset is used to fine-tune the Local SLM (Qwen) specifically on SRE tasks, making it an expert at writing remediation scripts.
+-   BERT Supervised Tuning: Historical labeled incidents are used to fine-tune the Phase 2 zero-shot classifier, driving triage accuracy to 95%+.
 
 ## Architecture and Flow
 
@@ -115,10 +122,18 @@ graph TD
     
     subgraph Phase4 ["Phase 4: Continuous Learning (The Feedback Loop)"]
         O --> P[1. LLM as Judge<br/>Scores SLM/LLM Resolution]:::feedback
-        P --> Q[2. Reinforcement Learning<br/>Generates Reward/Penalty]:::feedback
+        P --> Q[2. Tabular Q-Learning<br/>Generates Reward/Penalty]:::feedback
     end
     
     Q -.-> |Updates Policy Weightings| G
+
+    subgraph Phase5 ["Phase 5: Continuous Training & Fine-Tuning"]
+        S[Synthetic Data Generation<br/>& Historical Exports]:::feedback --> T[QLoRA Fine-Tuning<br/>SLM Model Upgrade]:::feedback
+        S --> U[Supervised Fine-Tuning<br/>BERT Classifier Upgrade]:::feedback
+    end
+
+    T -.-> |Deploys Smarter Weights| L_Model
+    U -.-> |Deploys Smarter Weights| H
 ```
 </details>
 
@@ -164,8 +179,13 @@ flowchart TD
     
     %% Phase 4
     Judge[LLM as Judge<br/>Evaluate Full Resolution]
-    RL[Reinforcement Learning<br/>Calculate Reward/Penalty]
+    RL[Tabular Q-Learning<br/>Calculate Reward/Penalty]
     UpdateWeights[(Update Routing Policy Weights)]
+
+    %% Phase 5
+    SyncData[(Synthetic Data / Historical Logs)]
+    QLoRA[QLoRA Fine-Tuning]
+    BertTune[Supervised Fine-Tuning]
 
     %% Flow Connections
     Start --> InputData
@@ -203,6 +223,12 @@ flowchart TD
     Judge --> RL
     RL --> UpdateWeights
     UpdateWeights -.->|Feedback Loop| RouterProcess
+
+    %% Phase 5 Connections
+    SyncData --> QLoRA
+    SyncData --> BertTune
+    QLoRA -.->|Update Model| LocalNode
+    BertTune -.->|Update Classifier| Classifier
 
     %% Styling
     classDef startend fill:#ffcdd2,stroke:#b71c1c,stroke-width:2px,color:#b71c1c
