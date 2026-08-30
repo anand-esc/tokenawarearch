@@ -4,6 +4,8 @@ try:
 except ImportError:
     PromptCompressor = None
 
+from config import Config
+
 class LogCompressor:
     """Uses LLMLingua to compress the final context payload before routing.
     
@@ -15,15 +17,17 @@ class LogCompressor:
         logger (logging.Logger): Logger for the compressor.
         compressor (PromptCompressor): LLMLingua compressor instance.
     """
-    def __init__(self, model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0"):
+    def __init__(self, model_name: str = None):
         self.logger = logging.getLogger(__name__)
+        self.model_name = model_name if model_name else Config.COMPRESSOR_MODEL
+        self.target_tokens = Config.COMPRESSION_TARGET_TOKENS
         self.logger.info("Initializing LLMLingua prompt compressor...")
         
         try:
             if PromptCompressor:
                 # We use TinyLlama for fast, local compression. It requires minimal VRAM.
                 self.compressor = PromptCompressor(
-                    model_name=model_name,
+                    model_name=self.model_name,
                     device_map="auto"
                 )
             else:
@@ -54,7 +58,7 @@ class LogCompressor:
                 context,
                 instruction="Extract the critical error details and context.",
                 question="What is the root cause of this incident?",
-                target_token=500,
+                target_token=self.target_tokens,
                 condition_compare=True,
                 condition_in_question='after',
                 rank_method='longllmlingua'

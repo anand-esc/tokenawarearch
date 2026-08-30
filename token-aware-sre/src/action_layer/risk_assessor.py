@@ -1,5 +1,7 @@
 import logging
 import re
+from typing import Dict, Any
+from config import Config
 
 class RiskAssessor:
     """Evaluates AI-generated code for destructive commands before execution.
@@ -14,6 +16,7 @@ class RiskAssessor:
     """
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        self.safe_threshold = Config.SAFE_RISK_THRESHOLD
         # List of highly dangerous keywords that require human approval
         self.destructive_patterns = [
             r"\brm\s+-rf\b",
@@ -28,7 +31,7 @@ class RiskAssessor:
             r"\bsudo\b" # Elevating privileges is inherently risky
         ]
 
-    def assess(self, proposed_fix: str) -> dict:
+    def assess(self, proposed_fix: str) -> Dict[str, Any]:
         """Calculates a Risk Score (0-100) for a proposed remediation script.
 
         Args:
@@ -66,8 +69,8 @@ class RiskAssessor:
             # Cap risk score at 100
             risk_score = min(100, risk_score)
             
-            # We only auto-remediate if the risk is extremely low
-            is_safe = risk_score < 30
+            # We only auto-remediate if the risk is below threshold
+            is_safe = risk_score < self.safe_threshold
             
             reason = "Passed safety checks." if is_safe else f"Detected dangerous patterns: {', '.join(detected_risks)}"
             

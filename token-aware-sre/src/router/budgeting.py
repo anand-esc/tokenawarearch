@@ -1,4 +1,6 @@
 import logging
+from typing import Dict, Any, Union
+from config import Config
 
 class TokenBudgeter:
     """Calculates the maximum allowable API spend based on Incident Severity.
@@ -8,13 +10,14 @@ class TokenBudgeter:
 
     Attributes:
         logger (logging.Logger): Logger for the budgeter.
-        cost_per_1k_tokens (float): The baseline cost calculation metric (defaulted to GPT-4).
+        cost_per_1k_tokens (float): The baseline cost calculation metric.
     """
-    def __init__(self, cost_per_1k_tokens=0.01):
+    def __init__(self, cost_per_1k_tokens: float = 0.01):
         self.logger = logging.getLogger(__name__)
         self.cost_per_1k_tokens = cost_per_1k_tokens
+        self.max_api_budget = Config.MAX_API_BUDGET
 
-    def calculate_budget(self, severity: int) -> dict:
+    def calculate_budget(self, severity: Union[int, float]) -> Dict[str, Any]:
         """Translates a severity score (1-10) into a strict financial token limit.
 
         Args:
@@ -40,6 +43,8 @@ class TokenBudgeter:
             max_spend_usd = (severity - 6) * 2.5 + 1.5
         else:
             max_spend_usd = (severity - 8) * 5.0 + 6.5
+            
+        max_spend_usd = min(max_spend_usd, self.max_api_budget)
 
         # Calculate rough token limit based on max spend
         if max_spend_usd == 0.0:

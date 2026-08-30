@@ -1,5 +1,7 @@
 import logging
+from typing import Dict, Optional, Any
 from transformers import pipeline
+from config import Config
 
 class IncidentClassifier:
     """Evaluates incident payloads to score Severity and Complexity locally.
@@ -11,16 +13,17 @@ class IncidentClassifier:
         logger (logging.Logger): Logger for the classifier.
         classifier (pipeline): HuggingFace zero-shot classification pipeline.
     """
-    def __init__(self, model_name="cross-encoder/nli-distilroberta-base"):
+    def __init__(self, model_name: Optional[str] = None):
         self.logger = logging.getLogger(__name__)
-        self.logger.info(f"Loading local classification model: {model_name}")
+        self.model_name = model_name if model_name else Config.CLASSIFIER_MODEL
+        self.logger.info(f"Loading local classification model: {self.model_name}")
         try:
-            self.classifier = pipeline("zero-shot-classification", model=model_name)
+            self.classifier = pipeline("zero-shot-classification", model=self.model_name)
         except Exception as e:
             self.logger.error(f"Failed to load classifier: {e}")
             self.classifier = None
 
-    def classify(self, payload: str) -> dict:
+    def classify(self, payload: str) -> Dict[str, Any]:
         """Classifies the compressed incident payload.
 
         Args:

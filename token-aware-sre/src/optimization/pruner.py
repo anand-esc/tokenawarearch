@@ -1,5 +1,7 @@
 from sentence_transformers import SentenceTransformer, util
 import logging
+from typing import List, Optional
+from config import Config
 
 class ContextPruner:
     """Removes semantically redundant log chunks to save token space.
@@ -13,17 +15,17 @@ class ContextPruner:
         model (SentenceTransformer): The local embedding model.
         similarity_threshold (float): Threshold above which chunks are considered redundant (0.0 to 1.0).
     """
-    def __init__(self, model_name='all-MiniLM-L6-v2', similarity_threshold=0.85):
+    def __init__(self, model_name: str = 'all-MiniLM-L6-v2', similarity_threshold: Optional[float] = None):
         self.logger = logging.getLogger(__name__)
         self.logger.info(f"Loading local embedding model: {model_name}")
-        self.similarity_threshold = similarity_threshold
+        self.similarity_threshold = similarity_threshold if similarity_threshold is not None else Config.SIMILARITY_THRESHOLD
         try:
             self.model = SentenceTransformer(model_name)
         except Exception as e:
             self.logger.error(f"Failed to load embedding model: {e}")
             self.model = None
 
-    def prune(self, chunks: list) -> list:
+    def prune(self, chunks: List[str]) -> List[str]:
         """Embeds and filters out semantically identical text chunks.
 
         Args:

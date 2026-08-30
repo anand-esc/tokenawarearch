@@ -1,7 +1,17 @@
 import os
 import logging
-from langchain_community.chat_models import ChatOllama
-from langchain_google_genai import ChatGoogleGenerativeAI
+from typing import Optional, Any
+try:
+    from langchain_community.chat_models import ChatOllama
+except ImportError:
+    ChatOllama = None
+
+try:
+    from langchain_google_genai import ChatGoogleGenerativeAI
+except ImportError:
+    ChatGoogleGenerativeAI = None
+
+from config import Config
 
 class ModelFactory:
     """Instantiates the appropriate Language Model for Phase 3.
@@ -15,12 +25,13 @@ class ModelFactory:
         local_model_name (str): The name of the local Ollama model (e.g., 'qwen').
         cloud_model_name (str): The name of the cloud Gemini model.
     """
-    def __init__(self, local_model_name="qwen", cloud_model_name="gemini-1.5-pro"):
+    def __init__(self, local_model_name: Optional[str] = None, cloud_model_name: Optional[str] = None):
         self.logger = logging.getLogger(__name__)
-        self.local_model_name = local_model_name
-        self.cloud_model_name = cloud_model_name
+        self.local_model_name = local_model_name if local_model_name else Config.LOCAL_SLM_NAME
+        self.cloud_model_name = cloud_model_name if cloud_model_name else Config.CLOUD_LLM_NAME
+        self.temperature = Config.MODEL_TEMPERATURE
 
-    def get_model(self, routing_decision: str):
+    def get_model(self, routing_decision: str) -> Any:
         """Returns a configured LangChain chat model instance.
 
         Args:
@@ -33,14 +44,14 @@ class ModelFactory:
             self.logger.info(f"Instantiating Cloud LLM: {self.cloud_model_name}")
             api_key = os.environ.get("GOOGLE_API_KEY")
             
-            if not api_key:
-                self.logger.warning("GOOGLE_API_KEY is not set. Falling back to Local SLM to prevent crash.")
+            if not api_key or not ChatGoogleGenerativeAI:
+                self.logger.warning("GOOGLE_API_KEY is not set or SDK missing. Falling back to Local SLM.")
                 return self._get_local_model()
             
             try:
                 return ChatGoogleGenerativeAI(
                     model=self.cloud_model_name,
-                    temperature=0.2, # Low temperature for deterministic SRE responses
+                    temperature=self.temperature, # Low temperature for deterministic SRE responses
                     google_api_key=api_key
                 )
             except Exception as e:
@@ -49,13 +60,17 @@ class ModelFactory:
         else:
             return self._get_local_model()
 
-    def _get_local_model(self):
+    def _get_local_model(self) -> Any:
         """Internal helper to instantiate the local Ollama model."""
         self.logger.info(f"Instantiating Local SLM: Ollama ({self.local_model_name})")
+        if not ChatOllama:
+            self.logger.warning("ChatOllama not found. Returning Mock Model.")
+            return "MOCK_LOCAL_SLM"
+            
         try:
             return ChatOllama(
                 model=self.local_model_name,
-                temperature=0.2
+                temperature=self.temperature
             )
         except Exception as e:
             self.logger.error(f"Failed to initialize Local SLM: {e}")
