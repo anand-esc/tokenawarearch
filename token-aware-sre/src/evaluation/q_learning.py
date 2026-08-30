@@ -2,6 +2,8 @@ import numpy as np
 import logging
 import pickle
 import os
+from typing import Optional
+from config import Config
 
 class QLearningRouter:
     """Tabular Q-Learning agent for dynamic SLM vs LLM routing.
@@ -16,13 +18,14 @@ class QLearningRouter:
         gamma (float): Discount factor.
         epsilon (float): Exploration rate for epsilon-greedy strategy.
     """
-    def __init__(self, states_severity=10, states_complexity=10, actions=2, alpha=0.1, gamma=0.9, epsilon=0.2):
+    def __init__(self, states_severity: int = 10, states_complexity: int = 10, actions: int = 2, 
+                 alpha: Optional[float] = None, gamma: Optional[float] = None, epsilon: Optional[float] = None):
         self.logger = logging.getLogger(__name__)
         # State space: Severity (0-10) x Complexity (0-10) x Actions (0=SLM, 1=LLM)
         self.q_table = np.zeros((states_severity + 1, states_complexity + 1, actions))
-        self.alpha = alpha
-        self.gamma = gamma
-        self.epsilon = epsilon
+        self.alpha = alpha if alpha is not None else Config.Q_LEARNING_ALPHA
+        self.gamma = gamma if gamma is not None else Config.Q_LEARNING_GAMMA
+        self.epsilon = epsilon if epsilon is not None else Config.Q_LEARNING_EPSILON
         
         # Path to persist the "Brain"
         self.save_path = os.path.join(os.path.dirname(__file__), "q_table.pkl")
