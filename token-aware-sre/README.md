@@ -2,7 +2,7 @@
 
 This repository contains the full enterprise-grade implementation of the Token-Aware Multi-Agent routing architecture for autonomous Site Reliability Engineering (SRE).
 
-## 🚀 Architecture Phases
+## Architecture Phases
 
 ### Phase 1: Context Optimization (`src/optimization/`)
 Reduces the payload size of incoming Datadog/Slack incident logs before they are fed to any LLM, saving significant API token costs.
@@ -37,7 +37,7 @@ To run a full real-time simulation simulating a database timeout across the enti
 python tests/integration_test.py
 ```
 
-### 🌐 SRE Human-in-the-Loop Dashboard
+### SRE Human-in-the-Loop Dashboard
 A beautiful, interactive Streamlit application that provides LangSmith-style transparency tracing of the agent's thought process, and an SRE Action Center to approve or reject blocked bash scripts.
 ```bash
 python -m streamlit run src/sre_dashboard.py

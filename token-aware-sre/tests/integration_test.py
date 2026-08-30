@@ -98,7 +98,7 @@ java.net.ConnectException: Connection refused (Connection refused)
     print(f"Applying Reward of {reward} to Q-Table for State({routing_decision['severity']}, {routing_decision['complexity']})...")
     q_router.update(routing_decision['severity'], routing_decision['complexity'], action_idx, reward)
     
-    print("\n✅ END-TO-END INTEGRATION TEST COMPLETE.")
+    print("\nEND-TO-END INTEGRATION TEST COMPLETE.")
 
 if __name__ == "__main__":
     run_realtime_integration_test()
