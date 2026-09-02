@@ -1,5 +1,16 @@
 import streamlit as st
 import time
+import sys
+import os
+
+# Add src to python path for imports
+sys.path.append(os.path.dirname(__file__))
+
+from optimization.pipeline import OptimizationFunnel
+from router.dynamic_router import GlobalDynamicRouter
+from execution.model_factory import ModelFactory
+from action_layer.risk_assessor import RiskAssessor
+from evaluation.q_learning import QLearningRouter
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -7,6 +18,19 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# --- Caching Backend Models for Fast UI Updates ---
+@st.cache_resource
+def load_backend():
+    with st.spinner("Loading Multi-Agent Models (This may take a moment on first launch)..."):
+        funnel = OptimizationFunnel()
+        router = GlobalDynamicRouter()
+        factory = ModelFactory()
+        q_router = QLearningRouter()
+        risk_assessor = RiskAssessor()
+    return funnel, router, factory, q_router, risk_assessor
+
+funnel, router, factory, q_router, risk_assessor = load_backend()
 
 # --- Custom Styling ---
 st.markdown("""
@@ -42,7 +66,7 @@ st.markdown("""
 col1, col2 = st.columns([3, 1])
 with col1:
     st.title("Autonomous SRE Defense Grid")
-    st.markdown("Human-in-the-Loop Interception & Multi-Agent Transparency Log")
+    st.markdown("Real-Time Multi-Agent Execution & Transparency Log")
 with col2:
     st.metric(label="Global Resolution Rate", value="93.0%", delta="2.1% (Post Q-Learning)")
 
@@ -57,6 +81,7 @@ java.net.ConnectException: Connection refused (Connection refused)
     at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:206)
 java.net.ConnectException: Connection refused (Connection refused)
 {"alert_id": "99382", "service": "web-api-prod", "status": "down"}""", height=150)
+chat_history = st.text_input("Optional Slack Context:", value="User A: Hey, the DB is down again. Let's restart redis.")
 
 if st.button("Process Incident via Multi-Agent Pipeline"):
     
@@ -65,15 +90,23 @@ if st.button("Process Incident via Multi-Agent Pipeline"):
     status_text = st.empty()
     
     status_text.text("Phase 1: Optimization Funnel (Semantic Pruning & Compression)...")
-    time.sleep(1)
+    start_time = time.time()
+    compressed_payload = funnel.process(raw_log, chat_history)
+    original_size = len(raw_log) + len(chat_history)
+    compressed_size = len(compressed_payload)
+    reduction = int((1 - (compressed_size / max(original_size, 1))) * 100)
     progress_bar.progress(33)
     
     status_text.text("Phase 2: Zero-Shot Classification & Budget Allocation...")
-    time.sleep(1.5)
+    routing_decision = router.route_incident(compressed_payload)
     progress_bar.progress(66)
     
     status_text.text("Phase 3 & 4: Model Execution & Risk Assessment...")
-    time.sleep(1)
+    
+    # Mocking LLM Execution to prevent hanging without API keys during demo
+    mock_script = "#!/bin/bash\nsystemctl restart redis\nrm -rf /var/log/redis/*"
+    assessment = risk_assessor.assess(mock_script)
+    
     progress_bar.progress(100)
     status_text.empty()
     progress_bar.empty()
@@ -84,59 +117,62 @@ if st.button("Process Incident via Multi-Agent Pipeline"):
     with colA:
         st.markdown("### 2. Agent Transparency Trace")
         
-        st.markdown("""
+        st.markdown(f"""
         <div class="card">
             <h4>Phase 1: Context Optimization</h4>
             <div style="display: flex; justify-content: space-between;">
-                <div><span class="metric-label">Original Tokens</span><br><span class="metric-value" style="color: #E74C3C;">883</span></div>
-                <div><span class="metric-label">Compressed Tokens</span><br><span class="metric-value" style="color: #27AE60;">241</span></div>
-                <div><span class="metric-label">Reduction</span><br><span class="metric-value">72%</span></div>
+                <div><span class="metric-label">Original Chars</span><br><span class="metric-value" style="color: #E74C3C;">{original_size}</span></div>
+                <div><span class="metric-label">Compressed Chars</span><br><span class="metric-value" style="color: #27AE60;">{compressed_size}</span></div>
+                <div><span class="metric-label">Reduction</span><br><span class="metric-value">{reduction}%</span></div>
             </div>
             <hr>
             <p><i>LLMLingua stripped non-essential stack trace frames based on zero-shot cosine similarity.</i></p>
         </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("""
+        target_color = "#27AE60" if routing_decision['model_target'] == "LOCAL_SLM" else "#E74C3C"
+        
+        st.markdown(f"""
         <div class="card" style="border-left-color: #8E44AD;">
             <h4>Phase 2: Q-Learning Routing Decision</h4>
-            <p><b>Severity:</b> 8/10 | <b>Complexity:</b> 7/10</p>
-            <p><b>Decision:</b> <b>CLOUD_LLM (Gemini 1.5 Pro)</b></p>
-            <p><b>Justification:</b> Allocated $1.50 budget. Q-Table determines local SLM has a high failure probability for complexity level 7.</p>
+            <p><b>Severity:</b> {routing_decision['severity']}/10 | <b>Complexity:</b> {routing_decision['complexity']}/10</p>
+            <p><b>Decision:</b> <b style="color:{target_color}">{routing_decision['model_target']}</b></p>
+            <p><b>Justification:</b> Allocated ${routing_decision['budget_usd']:.2f} budget. {routing_decision['reason']}</p>
         </div>
         """, unsafe_allow_html=True)
 
     with colB:
         st.markdown("### 3. Action Layer: Human Review")
         
-        st.markdown("**Cloud LLM Proposed Bash Script:**")
-        st.code("""#!/bin/bash
-# High-risk cache flush proposed
-redis-cli flushall
-systemctl restart redis
-# Clear logs to free disk space
-rm -rf /var/log/redis/*
-""", language="bash")
+        st.markdown("**Proposed Remediation Script:**")
+        st.code(mock_script, language="bash")
 
-        st.error("**RISK ASSESSOR: INTERCEPTED**")
-        st.markdown("Score: **85/100** | Detected Pattern: `rm -rf`")
+        if not assessment['is_safe']:
+            st.error("**RISK ASSESSOR: INTERCEPTED**")
+            st.markdown(f"Score: **{assessment['risk_score']}/100** | Reason: `{assessment['reason']}`")
+        else:
+            st.success("**RISK ASSESSOR: APPROVED**")
+            st.markdown(f"Score: **{assessment['risk_score']}/100** | Reason: `{assessment['reason']}`")
         
         c1, c2 = st.columns(2)
         with c1:
             st.markdown('<div class="approve-btn">', unsafe_allow_html=True)
             if st.button("APPROVE (+10 Reward)", use_container_width=True):
-                pass
+                action_idx = 0 if routing_decision['model_target'] == "LOCAL_SLM" else 1
+                q_router.update(routing_decision['severity'], routing_decision['complexity'], action_idx, 10)
+                st.success("Q-Table Updated with Positive Reward!")
             st.markdown('</div>', unsafe_allow_html=True)
             
         with c2:
             st.markdown('<div class="reject-btn">', unsafe_allow_html=True)
             if st.button("REJECT (-20 Penalty)", use_container_width=True):
-                pass
+                action_idx = 0 if routing_decision['model_target'] == "LOCAL_SLM" else 1
+                q_router.update(routing_decision['severity'], routing_decision['complexity'], action_idx, -20)
+                st.error("Q-Table Updated with Negative Penalty!")
             st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Sidebar ---
 with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/IEEE_logo.svg/1200px-IEEE_logo.svg.png", width=150)
     st.markdown("### Real-Time Cluster Status")
     st.success("Web Servers (Healthy)")
     st.error("Database Cluster (Degraded)")
