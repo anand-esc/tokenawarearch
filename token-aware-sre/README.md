@@ -6,7 +6,7 @@ This repository contains the full enterprise-grade implementation of the Token-A
 
 The repository includes a highly polished React/Vite interactive frontend for real-time demonstration of the multi-agent routing pipeline. 
 
-👉 **[See the Frontend README](frontend/README.md)** for features, setup instructions, and deployment details.
+**[See the Frontend README](frontend/README.md)** for features, setup instructions, and deployment details.
 
 ## Architecture Phases
 
