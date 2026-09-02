@@ -8,7 +8,7 @@ This directory contains the React-based interactive frontend for the Self-Healin
 - **Dynamic Model Configuration**: Configure the Local Small Language Model (SLM) endpoint and Cloud Large Language Model (LLM) API keys directly from the UI. The system supports direct integration with local instances of Ollama.
 - **Transparency Traces**: Inspect exactly why the routing agent made a decision. View detailed breakdowns of context reduction percentages, risk scores, calculated severity, and estimated cost savings per query.
 - **Interactive Q-Learning Heatmap**: A live visualization of the Tabular Q-Learning state matrix mapping Severity vs. Complexity. The heatmap updates as the system issues rewards and updates its routing policy.
-- **Human-in-the-Loop Simulation**: Configurable agent autonomy controls. Set the system to Ask Everytime to pause execution at the routing phase, allowing human operators to manually approve or override the agent's model selection.
+- **Human-in-the-Loop Simulation**: Configurable agent autonomy controls. Set the system to "Ask Everytime" to pause execution at the routing phase, allowing human operators to manually approve or override the agent's model selection.
 - **Session Persistence**: Chat history and metrics are saved locally in the browser, allowing operators to maintain multiple simulated incident investigations seamlessly.
 
 ## Quick Start Guide
@@ -22,34 +22,53 @@ The frontend is designed to run in tandem with the primary Python backend.
 
 Before running the frontend, ensure the FastAPI backend is active. From the root of the repository:
 
-\\ash
+```bash
 pip install -r requirements.txt
 uvicorn src.api:app --host 0.0.0.0 --port 8000
-`
+```
+
+*Note: On the first execution, the backend will automatically download the required HuggingFace embeddings (`all-MiniLM-L6-v2`) and zero-shot classification models (`nli-distilroberta-base`). This may take a few minutes depending on your network connection.*
+
 ### 2. Install Frontend Dependencies
 
 Navigate to the frontend directory and install the required Node modules:
 
-\\ash
+```bash
 cd frontend
 npm install
-`
+```
+
 ### 3. Start the Development Server
 
 Launch the Vite development server:
 
-\\ash
+```bash
 npm run dev
-`
+```
+
 The application will be accessible at http://localhost:5173.
 
-### 4. Configure Models
+### 4. Downloading and Running the Local SLM (Ollama)
 
-Upon loading the application, use the top-right configuration panels to initialize your models:
-- **Local SLM**: Defaults to http://localhost:11434 for standard Ollama deployments. Click Test to verify the connection.
-- **Cloud LLM**: Input your cloud provider API key and click Test to authenticate.
+To run the local routing models for free, you will need Ollama installed on your machine.
 
-Once both models register as Online, the system is ready to process incident logs.
+1. Download and install Ollama from https://ollama.com.
+2. Open a new terminal and pull the Qwen 2.5 model (or your preferred SLM):
+
+```bash
+ollama run qwen2.5:latest
+```
+
+This ensures the Ollama server is running locally on port 11434 and the model is downloaded.
+
+### 5. Configure Models in the UI
+
+Upon loading the application (http://localhost:5173), use the top-right configuration panels to initialize your models:
+
+- **Local SLM**: Click "Local SLM". The endpoint defaults to `http://localhost:11434` for standard Ollama deployments. Click "Test" to verify the connection.
+- **Cloud LLM**: Click "Cloud LLM". Input your cloud provider API key (e.g., Google Gemini) and click "Test" to authenticate.
+
+Once both models register as "Online" in the interface, the system is fully initialized and ready to process incident logs.
 
 ## Technology Stack
 
