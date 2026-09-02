@@ -2,6 +2,12 @@
 
 This repository contains the full enterprise-grade implementation of the Token-Aware Multi-Agent routing architecture for autonomous Site Reliability Engineering (SRE).
 
+## Interactive UI Control Plane
+
+The repository includes a highly polished React/Vite interactive frontend for real-time demonstration of the multi-agent routing pipeline. 
+
+👉 **[See the Frontend README](frontend/README.md)** for features, setup instructions, and deployment details.
+
 ## Architecture Phases
 
 ### Phase 1: Context Optimization (`src/optimization/`)
