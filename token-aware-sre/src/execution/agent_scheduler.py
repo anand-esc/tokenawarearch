@@ -17,12 +17,13 @@ class AgentScheduler:
         self.logger = logging.getLogger(__name__)
         self.factory = ModelFactory()
 
-    def schedule_and_execute(self, compressed_payload: str, routing_decision: dict) -> str:
+    def schedule_and_execute(self, compressed_payload: str, routing_decision: dict, runtime_config: dict = None) -> str:
         """Assigns a persona and invokes the language model to generate a fix.
 
         Args:
             compressed_payload (str): The optimized incident text from Phase 1.
             routing_decision (dict): The dictionary from Phase 2 containing the model target.
+            runtime_config (dict): Dynamic settings like API keys and endpoints.
 
         Returns:
             str: The raw bash command/script proposed by the model.
@@ -32,7 +33,7 @@ class AgentScheduler:
 
         try:
             model_target = routing_decision.get("model_target", "LOCAL_SLM")
-            model = self.factory.get_model(model_target)
+            model = self.factory.get_model(model_target, runtime_config=runtime_config)
 
             # Dynamic Persona Assignment
             payload_lower = compressed_payload.lower()
@@ -61,7 +62,16 @@ class AgentScheduler:
 
             self.logger.info("Executing model inference...")
             response = chain.invoke({"payload": compressed_payload})
-            return response.content
+            
+            result = response.content.strip()
+            # Strip markdown fences if LLM wraps them
+            if result.startswith("```"):
+                lines = result.split("\n")
+                lines = [l for l in lines if not l.startswith("```")]
+                result = "\n".join(lines)
+            if not result.startswith("#!"):
+                result = "#!/bin/bash\n" + result
+            return result
             
         except Exception as e:
             self.logger.error(f"Model execution failed in scheduler: {e}")

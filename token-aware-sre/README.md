@@ -44,7 +44,9 @@ python tests/integration_test.py
 ```
 
 ### SRE Human-in-the-Loop Dashboard
-A beautiful, interactive Streamlit application that provides LangSmith-style transparency tracing of the agent's thought process, and an SRE Action Center to approve or reject blocked bash scripts.
+A beautiful, interactive React application that provides LangSmith-style transparency tracing of the agent's thought process, and an SRE Action Center to approve or reject blocked bash scripts.
 ```bash
-python -m streamlit run src/sre_dashboard.py
+cd frontend
+npm install
+npm run dev
 ```

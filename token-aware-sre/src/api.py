@@ -6,18 +6,24 @@ import os
 import sys
 import requests as http_requests
 import logging
+from threading import Lock
 
 # Add current dir to path
 sys.path.append(os.path.dirname(__file__))
 
 # Import the existing Python backend
+from config import Config
 from optimization.pipeline import OptimizationFunnel
 from router.dynamic_router import GlobalDynamicRouter
-from execution.model_factory import ModelFactory
+from execution.agent_scheduler import AgentScheduler
 from action_layer.risk_assessor import RiskAssessor
 from evaluation.q_learning import QLearningRouter
+from evaluation.evaluator import IncidentEvaluator
 
 logger = logging.getLogger(__name__)
+
+# Validate Configs on startup
+Config.validate()
 
 app = FastAPI(title="Token-Aware Multi-Agent API")
 
@@ -34,12 +40,13 @@ app.add_middleware(
 print("Initializing Models (This will download HF models if not cached)...")
 funnel = OptimizationFunnel()
 router = GlobalDynamicRouter()
-factory = ModelFactory()
+scheduler = AgentScheduler()
 q_router = QLearningRouter()
 risk_assessor = RiskAssessor()
+evaluator = IncidentEvaluator()
 print("Models loaded successfully.")
 
-# Runtime config -- updated from frontend
+# Thread-safe runtime config
 runtime_config = {
     "llm_api_key": os.environ.get("GOOGLE_API_KEY", ""),
     "llm_name": "gemini-2.5-pro",
@@ -48,129 +55,65 @@ runtime_config = {
     "slm_name": "qwen2.5",
     "slm_endpoint": "http://localhost:11434",
 }
+config_lock = Lock()
 
 # --- Pydantic Models ---
 class ChatRequest(BaseModel):
+    """Payload for initiating a chat request with an incident log."""
     prompt: str
     chat_history: str = ""
     is_outage: bool = False
 
 class RewardRequest(BaseModel):
+    """Payload for submitting a Q-Learning reward update."""
     severity: int
     complexity: int
     model_target: str
     reward: int
 
 class ConfigUpdate(BaseModel):
+    """Payload for dynamically updating model runtime configuration."""
     model_type: str  # 'llm' or 'slm'
     name: str = ""
     api_key: str = ""
     endpoint: str = ""
 
 class TestConnectionRequest(BaseModel):
+    """Payload for testing connectivity to a specified model endpoint."""
     model_type: str  # 'llm' or 'slm'
     api_key: str = ""
     endpoint: str = ""
 
-# --- Helpers ---
-
-SRE_SYSTEM_PROMPT = """You are an expert Site Reliability Engineer. Given an infrastructure incident description, generate a concise bash remediation script. Output ONLY the script starting with #!/bin/bash. No explanations, no markdown fences."""
-
-def call_llm(prompt: str) -> str:
-    """Call Cloud LLM (Google Gemini) with the real API key."""
-    api_key = runtime_config["llm_api_key"]
-    model_name = runtime_config["llm_name"]
-    
-    if not api_key:
-        return "#!/bin/bash\n# ERROR: No LLM API key configured.\n# Please set your Gemini API key in the LLM Configuration panel.\necho 'No API key set'"
-    
-    try:
-        from langchain_google_genai import ChatGoogleGenerativeAI
-        from langchain_core.messages import HumanMessage, SystemMessage
-        
-        llm = ChatGoogleGenerativeAI(
-            model=model_name,
-            temperature=0.2,
-            google_api_key=api_key
-        )
-        response = llm.invoke([
-            SystemMessage(content=SRE_SYSTEM_PROMPT),
-            HumanMessage(content=prompt)
-        ])
-        result = response.content.strip()
-        # Strip markdown fences if LLM wraps them
-        if result.startswith("```"):
-            lines = result.split("\n")
-            lines = [l for l in lines if not l.startswith("```")]
-            result = "\n".join(lines)
-        if not result.startswith("#!"):
-            result = "#!/bin/bash\n" + result
-        return result
-    except Exception as e:
-        logger.error(f"LLM call failed: {e}")
-        return f"#!/bin/bash\n# ERROR: LLM call failed\n# {str(e)[:200]}\necho 'LLM Error'"
-
-def call_slm(prompt: str) -> str:
-    """Call Local SLM (Ollama) at the configured endpoint."""
-    endpoint = runtime_config["slm_endpoint"].rstrip("/")
-    model_name = runtime_config["slm_name"]
-    
-    if not endpoint:
-        return "#!/bin/bash\n# ERROR: No SLM endpoint configured.\necho 'No endpoint set'"
-    
-    try:
-        resp = http_requests.post(
-            f"{endpoint}/api/generate",
-            json={
-                "model": model_name,
-                "prompt": f"{SRE_SYSTEM_PROMPT}\n\nIncident:\n{prompt}",
-                "stream": False,
-                "options": {"temperature": 0.2}
-            },
-            timeout=60
-        )
-        resp.raise_for_status()
-        result = resp.json().get("response", "").strip()
-        # Strip markdown fences if SLM wraps them
-        if result.startswith("```"):
-            lines = result.split("\n")
-            lines = [l for l in lines if not l.startswith("```")]
-            result = "\n".join(lines)
-        if not result.startswith("#!"):
-            result = "#!/bin/bash\n" + result
-        return result
-    except http_requests.exceptions.ConnectionError:
-        return f"#!/bin/bash\n# ERROR: Cannot connect to Ollama at {endpoint}\n# Make sure Ollama is running: ollama serve\necho 'SLM Offline'"
-    except Exception as e:
-        logger.error(f"SLM call failed: {e}")
-        return f"#!/bin/bash\n# ERROR: SLM call failed\n# {str(e)[:200]}\necho 'SLM Error'"
-
 # --- Endpoints ---
 
 @app.post("/api/config")
-async def update_config(req: ConfigUpdate):
+def update_config(req: ConfigUpdate):
     """Update runtime model configuration from the frontend."""
-    if req.model_type == "llm":
-        if req.api_key:
-            runtime_config["llm_api_key"] = req.api_key
-        if req.name:
-            runtime_config["llm_name"] = req.name
-        if req.endpoint:
-            runtime_config["llm_endpoint"] = req.endpoint
-    elif req.model_type == "slm":
-        if req.api_key:
-            runtime_config["slm_api_key"] = req.api_key
-        if req.name:
-            runtime_config["slm_name"] = req.name
-        if req.endpoint:
-            runtime_config["slm_endpoint"] = req.endpoint
+    with config_lock:
+        if req.model_type == "llm":
+            if req.api_key:
+                runtime_config["llm_api_key"] = req.api_key
+            if req.name:
+                runtime_config["llm_name"] = req.name
+            if req.endpoint:
+                runtime_config["llm_endpoint"] = req.endpoint
+        elif req.model_type == "slm":
+            if req.api_key:
+                runtime_config["slm_api_key"] = req.api_key
+            if req.name:
+                runtime_config["slm_name"] = req.name
+            if req.endpoint:
+                runtime_config["slm_endpoint"] = req.endpoint
     return {"status": "ok", "config": runtime_config}
 
 @app.post("/api/test-connection")
-async def test_connection(req: TestConnectionRequest):
+def test_connection(req: TestConnectionRequest):
     """Actually test connectivity to LLM or SLM."""
+    with config_lock:
+        current_config = runtime_config.copy()
+        
     if req.model_type == "slm":
-        endpoint = (req.endpoint or runtime_config["slm_endpoint"]).rstrip("/")
+        endpoint = (req.endpoint or current_config["slm_endpoint"]).rstrip("/")
         try:
             resp = http_requests.get(f"{endpoint}/api/tags", timeout=5)
             resp.raise_for_status()
@@ -186,7 +129,7 @@ async def test_connection(req: TestConnectionRequest):
             return {"status": "error", "message": str(e)[:300]}
     
     elif req.model_type == "llm":
-        api_key = req.api_key or runtime_config["llm_api_key"]
+        api_key = req.api_key or current_config["llm_api_key"]
         if not api_key:
             return {"status": "error", "message": "No API key provided. Enter your Gemini API key."}
         try:
@@ -208,9 +151,13 @@ async def test_connection(req: TestConnectionRequest):
     return {"status": "error", "message": "Unknown model_type"}
 
 @app.post("/api/chat")
-async def process_chat(req: ChatRequest):
+def process_chat(req: ChatRequest):
+    """Processes an incoming chat payload through the entire optimization and execution funnel."""
     start_time = time.time()
     
+    with config_lock:
+        current_config = runtime_config.copy()
+        
     original_size = len(req.prompt) + len(req.chat_history)
     
     # Phase 1: Optimization
@@ -226,27 +173,43 @@ async def process_chat(req: ChatRequest):
     reduction = int((1 - (compressed_size / max(original_size, 1))) * 100)
     reduction = max(0, reduction)
     
+    # Calculate Real Token Costs
+    # Using basic heuristic: 4 chars = 1 token.
+    # We use a baseline config value for token costs.
+    cost_per_1k_tokens = 0.01  # USD
+    original_tokens = original_size / 4.0
+    compressed_tokens = compressed_size / 4.0
+    
+    original_cost = (original_tokens / 1000.0) * cost_per_1k_tokens
+    compressed_cost = (compressed_tokens / 1000.0) * cost_per_1k_tokens
+    
     # Phase 2: Routing
     t0 = time.time()
     routing_decision = router.route_incident(compressed_payload)
     t_route = round((time.time() - t0) * 1000)
     
-    # Phase 3: REAL Execution
+    # Phase 3: REAL Execution via AgentScheduler
     t0 = time.time()
     model_target = routing_decision['model_target']
     
-    if model_target == "CLOUD_LLM":
-        script = call_llm(compressed_payload)
-    else:
-        script = call_slm(compressed_payload)
+    script = scheduler.schedule_and_execute(
+        compressed_payload=compressed_payload,
+        routing_decision=routing_decision,
+        runtime_config=current_config
+    )
     
     t_execute = round((time.time() - t0) * 1000)
     
+    # Dynamic per-call savings calculation
+    if model_target == "LOCAL_SLM":
+        per_call_saving = original_cost
+    else:
+        per_call_saving = original_cost - compressed_cost
+        
     # Phase 4: Risk Assessment
     assessment = risk_assessor.assess(script)
     
     latency = round((time.time() - start_time) * 1000)
-    per_call_saving = 0.14 if model_target == "LOCAL_SLM" else 0.00
     
     return {
         "response": script,
@@ -273,13 +236,19 @@ async def process_chat(req: ChatRequest):
     }
 
 @app.post("/api/reward")
-async def apply_reward(req: RewardRequest):
+def apply_reward(req: RewardRequest):
+    """Records the outcome of a routing decision using Q-Learning."""
     action_idx = 0 if req.model_target == "LOCAL_SLM" else 1
-    q_router.update(req.severity, req.complexity, action_idx, req.reward)
-    return {"status": "success", "message": f"Q-Table updated with {req.reward}"}
+    
+    # Determine success heuristically (reward > 0)
+    is_success = req.reward > 0
+    calculated_reward = evaluator.calculate_reward(action_idx, is_success)
+    
+    q_router.update(req.severity, req.complexity, action_idx, calculated_reward)
+    return {"status": "success", "message": f"Q-Table updated with {calculated_reward}"}
 
 @app.get("/api/qtable")
-async def get_qtable():
+def get_qtable():
     """Return the Q-Table as a JSON-safe dictionary."""
     try:
         table = q_router.q_table
@@ -297,21 +266,24 @@ async def get_qtable():
         return {"q_table": {}, "error": str(e)}
 
 @app.get("/api/status")
-async def get_status():
+def get_status():
     """Check actual health of pipeline components and live model connectivity."""
+    with config_lock:
+        current_config = runtime_config.copy()
+        
     # Check SLM (Ollama)
     slm_status = "Offline"
-    slm_endpoint = runtime_config["slm_endpoint"].rstrip("/")
+    slm_endpoint = current_config["slm_endpoint"].rstrip("/")
     if slm_endpoint:
         try:
             r = http_requests.get(f"{slm_endpoint}/api/tags", timeout=3)
             if r.status_code == 200:
                 slm_status = "Online"
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"SLM health check failed: {e}")
     
     # Check LLM (API key present)
-    llm_status = "Online" if runtime_config["llm_api_key"] else "No Key"
+    llm_status = "Online" if current_config["llm_api_key"] else "No Key"
     
     return {
         "llm_status": llm_status,

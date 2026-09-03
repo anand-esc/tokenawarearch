@@ -3,7 +3,8 @@ import {
   Settings, MessageSquare, Plus, 
   Send, Database, Bot, ShieldAlert, ArrowRight, Activity, 
   PanelLeft, AlertTriangle, GitCompare, BrainCircuit, Play,
-  RefreshCw, X, Clock, Shield
+  RefreshCw, X, Clock, Shield,
+  Trash2, Code, Calculator
 } from 'lucide-react';
 
 export default function App() {
@@ -14,8 +15,11 @@ export default function App() {
   const [sessions, setSessions] = useState(() => {
     try {
       const stored = localStorage.getItem('sre_sessions');
-      return stored ? JSON.parse(stored) : [];
-    } catch { return []; }
+      
+    } catch {}
+    const mockData = [{"id": "session_1", "title": "K8s Pod Eviction (OOM)", "timestamp": "2026-09-03T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "[CRITICAL] Kubernetes Node-8 unresponsive. Kubelet PLEG timeout. Pods Evicted. Memory threshold 98% exceeded. Redis-master OOMKilled."}, {"role": "assistant", "content": "#!/bin/bash\nkubectl cordon node-8\nkubectl scale deployment redis-master --replicas=2\nkubectl drain node-8 --ignore-daemonsets", "transparency": {"original_prompt": "[CRITICAL] Kubernetes Node-8 unresponsive. Kubelet PLEG timeout...", "compressed_prompt": "Kubernetes Node-8 unresponsive. PLEG timeout. Pods Evicted. Memory >98%. Redis-master OOMKilled.", "original_chars": 120, "compressed_chars": 90, "reduction_percent": 25, "severity": 9, "complexity": 8, "model_target": "CLOUD_LLM", "budget_usd": 0.05, "routing_reason": "High severity threshold breached.", "is_safe": true, "risk_score": 10, "risk_reason": "Standard Kubernetes maintenance commands.", "latency_ms": 1250, "t_optimize_ms": 150, "t_route_ms": 120, "t_execute_ms": 980, "estimated_savings_usd": 0.01}}, {"role": "user", "content": "Execution Complete:\nNode cordoned and drained successfully."}, {"role": "assistant", "content": "Excellent. I have verified that memory thresholds on the remaining nodes are stabilizing at 45% and Redis-master has successfully failed over to a healthy pod. The cascading OOM event is now fully mitigated. Is there anything else you need investigated?"}]}, {"id": "session_2", "title": "Cron Job Syntax", "timestamp": "2026-09-03T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "How do I write a cron expression to run a database backup script every Tuesday at 3:15 AM?"}, {"role": "assistant", "content": "#!/bin/bash\necho '15 3 * * 2 /path/to/backup.sh' | crontab -", "transparency": {"original_prompt": "How do I write a cron expression to run a database backup script every Tuesday at 3:15 AM?", "compressed_prompt": "cron expression database backup script Tuesday 3:15 AM", "original_chars": 90, "compressed_chars": 54, "reduction_percent": 40, "severity": 1, "complexity": 2, "model_target": "LOCAL_SLM", "budget_usd": 0.0, "routing_reason": "Budget restricted to $0.00 due to low severity.", "is_safe": true, "risk_score": 5, "risk_reason": "No destructive actions detected.", "latency_ms": 800, "t_optimize_ms": 80, "t_route_ms": 60, "t_execute_ms": 660, "estimated_savings_usd": 0.02}}]}, {"id": "session_3", "title": "SSL Certificate Expired", "timestamp": "2026-09-02T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "[FATAL] SSL/TLS certificate expired on loadbalancer-primary. Ingress controller rejecting all HTTPS traffic. 100% downtime on public API."}, {"role": "assistant", "content": "#!/bin/bash\ncertbot renew --force-renewal\nsystemctl reload nginx", "transparency": {"original_prompt": "[FATAL] SSL/TLS certificate expired on loadbalancer-primary. Ingress controller rejecting all HTTPS traffic.", "compressed_prompt": "SSL/TLS certificate expired loadbalancer-primary. Ingress rejecting HTTPS traffic. 100% downtime public API.", "original_chars": 139, "compressed_chars": 108, "reduction_percent": 22, "severity": 10, "complexity": 5, "model_target": "CLOUD_LLM", "budget_usd": 0.1, "routing_reason": "Max severity triggers cloud LLM override.", "is_safe": true, "risk_score": 15, "risk_reason": "Standard certificate renewal.", "latency_ms": 1100, "t_optimize_ms": 110, "t_route_ms": 90, "t_execute_ms": 900, "estimated_savings_usd": 0.008}}, {"role": "user", "content": "Execution output:\nSuccess! Certificate saved at /etc/letsencrypt/live/primary/fullchain.pem"}, {"role": "assistant", "content": "Great. The new certificate is now loaded into the ingress controller. HTTPS traffic is flowing normally again with 200 OK responses. Downtime resolved."}]}, {"id": "session_4", "title": "Postgres Slow Queries", "timestamp": "2026-09-02T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "[WARN] Postgres slow query log detected: SELECT * FROM orders WHERE status='pending' taking > 2000ms. System load increasing."}, {"role": "assistant", "content": "#!/bin/bash\npsql -U postgres -c \"CREATE INDEX CONCURRENTLY idx_orders_status ON orders(status);\"", "transparency": {"original_prompt": "[WARN] Postgres slow query log detected: SELECT * FROM orders WHERE status='pending' taking > 2000ms. System load increasing.", "compressed_prompt": "Postgres slow query: SELECT * FROM orders WHERE status='pending' > 2000ms.", "original_chars": 125, "compressed_chars": 76, "reduction_percent": 39, "severity": 4, "complexity": 6, "model_target": "CLOUD_LLM", "budget_usd": 0.02, "routing_reason": "Complexity requires capable LLM planning.", "is_safe": true, "risk_score": 40, "risk_reason": "Concurrent index creation is safe but alters database.", "latency_ms": 1400, "t_optimize_ms": 100, "t_route_ms": 120, "t_execute_ms": 1180, "estimated_savings_usd": 0.015}}, {"role": "user", "content": "Execution output:\nCREATE INDEX"}, {"role": "assistant", "content": "Index created concurrently without locking the table. Query latency for SELECT * FROM orders WHERE status='pending' has dropped from >2000ms down to ~15ms. System load is normalizing. I recommend setting up an alert for this table if the row count exceeds 10M."}]}, {"id": "session_5", "title": "ElasticSearch Split-Brain", "timestamp": "2026-08-29T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "[CRITICAL] ElasticSearch cluster split-brain detected. Node-3 and Node-4 have elected different master nodes. Data write operations failing with 503 Service Unavailable."}, {"role": "assistant", "content": "MANUAL_INTERVENTION_REQUIRED", "transparency": {"original_prompt": "[CRITICAL] ElasticSearch cluster split-brain detected. Node-3 and Node-4 have elected different master nodes.", "compressed_prompt": "ElasticSearch cluster split-brain Node-3 Node-4 different master nodes. Writes failing 503.", "original_chars": 172, "compressed_chars": 92, "reduction_percent": 46, "severity": 8, "complexity": 9, "model_target": "CLOUD_LLM", "budget_usd": 0.08, "routing_reason": "Architectural complexity demands Cloud LLM.", "is_safe": true, "risk_score": 0, "risk_reason": "Model correctly deferred to human.", "latency_ms": 1800, "t_optimize_ms": 140, "t_route_ms": 160, "t_execute_ms": 1500, "estimated_savings_usd": 0.025}}]}, {"id": "session_6", "title": "High CPU Alert", "timestamp": "2026-08-29T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "[WARNING] CPU usage on app-worker-03 has sustained 85% for 15 minutes. Load average: 4.5. Top process: python3 celery_worker.py."}, {"role": "assistant", "content": "#!/bin/bash\nsystemctl restart celery_worker\nkill -9 $(pgrep -f 'celery worker')", "transparency": {"original_prompt": "[WARNING] CPU usage on app-worker-03 has sustained 85% for 15 minutes. Load average: 4.5. Top process: python3 celery_worker.py.", "compressed_prompt": "CPU usage app-worker-03 85% 15 minutes. Load 4.5. Top process python3 celery_worker.py.", "original_chars": 128, "compressed_chars": 89, "reduction_percent": 30, "severity": 5, "complexity": 4, "model_target": "LOCAL_SLM", "budget_usd": 0.01, "routing_reason": "Q-Table policy highly favors SLM for moderate CPU restarts.", "is_safe": false, "risk_score": 65, "risk_reason": "kill -9 is aggressive and potentially unsafe.", "latency_ms": 850, "t_optimize_ms": 90, "t_route_ms": 50, "t_execute_ms": 710, "estimated_savings_usd": 0.03}}]}, {"id": "session_7", "title": "Nginx Log Rotation", "timestamp": "2026-08-29T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "Nginx access logs are getting too large and eating up disk space. How do I configure logrotate to keep only 7 days of compressed logs?"}, {"role": "assistant", "content": "#!/bin/bash\necho '/var/log/nginx/*.log {\\n  daily\\n  missingok\\n  rotate 7\\n  compress\\n  delaycompress\\n  notifempty\\n}' > /etc/logrotate.d/nginx_custom", "transparency": {"original_prompt": "Nginx access logs are getting too large and eating up disk space. How do I configure logrotate to keep only 7 days of compressed logs?", "compressed_prompt": "Nginx access logs too large. Configure logrotate keep 7 days compressed logs.", "original_chars": 136, "compressed_chars": 78, "reduction_percent": 42, "severity": 2, "complexity": 3, "model_target": "LOCAL_SLM", "budget_usd": 0.0, "routing_reason": "Trivial configuration generation.", "is_safe": true, "risk_score": 10, "risk_reason": "Standard configuration file write.", "latency_ms": 700, "t_optimize_ms": 80, "t_route_ms": 40, "t_execute_ms": 580, "estimated_savings_usd": 0.02}}]}];
+    localStorage.setItem('sre_sessions', JSON.stringify(mockData));
+    return mockData;
   });
   const [currentSessionId, setCurrentSessionId] = useState(null);
   const [activeTransparency, setActiveTransparency] = useState(null);
@@ -35,8 +39,8 @@ export default function App() {
   
   // Model config modals
   const [activeModelPanel, setActiveModelPanel] = useState(null); // 'llm' | 'slm' | null
-  const [llmConfig, setLlmConfig] = useState({ name: 'Gemini 2.5 Pro', apiKey: '', logs: [] });
-  const [slmConfig, setSlmConfig] = useState({ name: 'Qwen 2.5 (Ollama)', apiKey: 'http://localhost:11434', logs: [] });
+  const [llmConfig, setLlmConfig] = useState({ name: 'Unknown (Test to discover)', apiKey: '', logs: [] });
+  const [slmConfig, setSlmConfig] = useState({ name: 'Unknown (Test to discover)', apiKey: 'http://localhost:11434', logs: [] });
   
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -52,7 +56,9 @@ export default function App() {
   }, [messages, currentSessionId]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
   };
 
   useEffect(() => { scrollToBottom(); }, [messages, isProcessing, pendingApproval]);
@@ -84,7 +90,8 @@ export default function App() {
     };
     checkStatus();
     const interval = setInterval(checkStatus, 10000);
-    return () => clearInterval(interval);
+  
+  return () => clearInterval(interval);
   }, []);
 
   // Loading micro-states
@@ -118,11 +125,10 @@ export default function App() {
 
 
 
-  const handleSend = async (e, isOutage = false) => {
+  const handleSend = async (e, simulateText = null) => {
     if (e && e.preventDefault) e.preventDefault();
-    const currentInput = isOutage 
-      ? "CRITICAL: Kubernetes Node 4 unresponsive. Pods Evicted. OOMKilled on redis-master-0. Memory threshold 95% exceeded. Cluster autoscaler failing." 
-      : input;
+    const currentInput = simulateText !== null ? simulateText : input;
+    const isOutage = simulateText !== null;
     if (!currentInput.trim() || isProcessing) return;
     
     let sessionId = currentSessionId;
@@ -204,6 +210,18 @@ export default function App() {
     setActiveTransparency(null);
   };
 
+  const deleteSession = (id) => {
+    setSessions(prev => {
+      const updated = prev.filter(s => s.id !== id);
+      localStorage.setItem('sre_sessions', JSON.stringify(updated));
+      return updated;
+    });
+    if (currentSessionId === id) {
+      setCurrentSessionId(null);
+      setMessages([]);
+    }
+  };
+
   const loadSession = (sessionId) => {
     const session = sessions.find(s => s.id === sessionId);
     if (session) {
@@ -221,6 +239,24 @@ export default function App() {
   };
 
   const statusDot = (s) => s === 'Online' ? 'bg-green-500' : s === 'Offline' ? 'bg-red-500' : 'bg-yellow-400 animate-pulse';
+
+  const groupedSessions = {
+    'Today': [],
+    'Yesterday': [],
+    'Previous 7 Days': []
+  };
+
+  const todayDate = new Date();
+  todayDate.setHours(0, 0, 0, 0);
+  const yesterdayDate = new Date(todayDate);
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+
+  sessions.forEach(session => {
+    const d = new Date(session.timestamp);
+    if (d >= todayDate) groupedSessions['Today'].push(session);
+    else if (d >= yesterdayDate) groupedSessions['Yesterday'].push(session);
+    else groupedSessions['Previous 7 Days'].push(session);
+  });
 
   return (
     <div className="flex h-screen bg-gray-50 text-gray-800 overflow-hidden font-sans">
@@ -244,12 +280,28 @@ export default function App() {
                 <p className="text-xs text-gray-400 px-3 py-2">No incidents yet</p>
               ) : (
                 <div className="space-y-0.5 max-h-48 overflow-y-auto">
-                  {sessions.map((session) => (
-                    <button key={session.id} onClick={() => loadSession(session.id)} className={`flex items-center space-x-2.5 text-sm font-medium w-full py-2 px-3 rounded-lg transition-colors text-left group ${currentSessionId === session.id ? 'bg-gray-100 text-gray-900' : 'hover:bg-gray-50 text-gray-600'}`}>
-                      <MessageSquare size={14} className={`shrink-0 ${currentSessionId === session.id ? 'text-gray-900' : 'text-gray-300 group-hover:text-gray-900'}`} />
-                      <span className="truncate">{session.title}</span>
-                    </button>
-                  ))}
+                  <div className="space-y-4 pr-1 pb-4">
+                    {Object.entries(groupedSessions).filter(([_, group]) => group.length > 0).map(([groupName, groupSessions]) => (
+                      <div key={groupName} className="space-y-1">
+                        <div className="text-[12px] font-bold text-gray-600 mb-1 flex items-center">
+                          ▼ {groupName}
+                        </div>
+                        <div className="space-y-0.5">
+                          {groupSessions.map((session) => (
+                            <div key={session.id} className={`flex items-center group ${currentSessionId === session.id ? 'bg-gray-100 text-gray-900' : 'hover:bg-gray-50 text-gray-600'} rounded-lg transition-colors`}>
+                              <div className="text-gray-300 font-mono text-xs pl-2 shrink-0 select-none">|__</div>
+                              <button onClick={() => loadSession(session.id)} className="flex items-center space-x-2 text-sm font-medium w-full py-1.5 px-2 text-left overflow-hidden">
+                                <span className="truncate text-xs">{session.title}</span>
+                              </button>
+                              <button onClick={(e) => { e.stopPropagation(); deleteSession(session.id); }} className="p-1 mr-1 text-gray-400 hover:text-red-500 hover:bg-red-100 rounded-md opacity-0 group-hover:opacity-100 transition-all shrink-0">
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -257,10 +309,24 @@ export default function App() {
             {/* Testing Tools */}
             <div className="mt-7 px-4">
               <div className="text-[11px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Testing Tools</div>
-              <button onClick={(e) => handleSend(e, true)} disabled={isProcessing} className="flex items-center space-x-2.5 text-sm font-bold w-full py-2 px-3 rounded-lg transition-colors text-left text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed group">
-                <Play size={14} className="text-red-500 group-hover:text-red-700 shrink-0" />
-                <span>Simulate Outage</span>
-              </button>
+              <div className="space-y-1">
+                <button onClick={(e) => handleSend(e, "CRITICAL: Kubernetes Node 4 unresponsive. Pods Evicted. OOMKilled on redis-master-0. Memory threshold 95% exceeded. Cluster autoscaler failing.")} disabled={isProcessing} className="flex items-center space-x-2.5 text-sm font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group">
+                  <Play size={14} className="text-gray-400 group-hover:text-gray-900 shrink-0" />
+                  <span>Simulate Outage</span>
+                </button>
+                <button onClick={(e) => handleSend(e, "Traceback (most recent call last):\n  File \"app/main.py\", line 124, in process_data\n    result = parser.parse(raw_data)\nAttributeError: 'NoneType' object has no attribute 'parse'\nError: Python function parsing failed due to null object reference.")} disabled={isProcessing} className="flex items-center space-x-2.5 text-sm font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group">
+                  <Code size={14} className="text-gray-400 group-hover:text-gray-900 shrink-0" />
+                  <span>Python Function Error</span>
+                </button>
+                <button onClick={(e) => handleSend(e, "[WARN] Database connection pool exhausted. 1000/1000 active connections in use. Query timeout after 30000ms.")} disabled={isProcessing} className="flex items-center space-x-2.5 text-sm font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group">
+                  <Database size={14} className="text-gray-400 group-hover:text-gray-900 shrink-0" />
+                  <span>Simulate DB Deadlock</span>
+                </button>
+                <button onClick={(e) => handleSend(e, "What is 25 + 17?")} disabled={isProcessing} className="flex items-center space-x-2.5 text-sm font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group" title="Tests SLM routing on Severity 1 requests">
+                  <Calculator size={14} className="text-gray-400 group-hover:text-gray-900 shrink-0" />
+                  <span>Simple Math Test</span>
+                </button>
+              </div>
             </div>
           </div>
           
@@ -371,12 +437,9 @@ export default function App() {
                     ) : msg.content}
                   </div>
                   
-                  {/* Action row: View Trace + Reject/Approve if unsafe */}
+                  {/* Action row: Reject/Approve if unsafe */}
                   {msg.role === 'assistant' && msg.transparency && (
                     <div className="mt-2 ml-1 flex items-center space-x-2">
-                      <button onClick={() => setActiveTransparency(msg.transparency)} className="flex items-center space-x-1 text-[11px] text-gray-500 hover:text-gray-900 font-semibold transition-colors bg-white px-2.5 py-1 rounded-md border border-gray-200 hover:shadow-sm">
-                        <Activity size={12} /> <span>View Trace</span>
-                      </button>
                       {!msg.transparency.is_safe && (
                         <>
                           <button onClick={() => handleReward(msg.transparency, -20)} className="flex items-center space-x-1 text-[11px] text-red-600 font-bold bg-red-50 px-2.5 py-1 rounded-md border border-red-200 hover:bg-red-100 transition-colors">
@@ -441,15 +504,30 @@ export default function App() {
         <div className={`absolute w-full px-4 md:px-10 transition-all duration-500 flex justify-center ${
           messages.length === 0 ? 'bottom-1/2 translate-y-20' : 'bottom-0 pb-6 pt-3 bg-gradient-to-t from-gray-50 via-gray-50/95 to-transparent'
         }`}>
-          <form onSubmit={handleSend} className="w-full max-w-3xl relative flex items-center bg-white border border-gray-300 rounded-2xl shadow-lg focus-within:border-gray-500 focus-within:ring-4 focus-within:ring-gray-500/10 transition-all">
+          <form onSubmit={handleSend} className="w-full max-w-3xl relative flex items-center bg-white border border-gray-300 rounded-2xl shadow-lg focus-within:border-gray-500 focus-within:ring-4 focus-within:ring-gray-500/10 transition-all pl-2">
+            
+            {messages.filter(m => m.role === 'assistant' && m.transparency).length > 0 && (
+              <button 
+                type="button"
+                onClick={() => {
+                  const lastMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.transparency);
+                  if (lastMsg) setActiveTransparency(lastMsg.transparency);
+                }} 
+                className="px-3 py-2 ml-1 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors flex items-center shrink-0 space-x-1.5 font-medium text-sm"
+                title="View Latest Trace"
+              >
+                <Activity size={16} /> <span className="hidden sm:inline">View Trace</span>
+              </button>
+            )}
+
             <input
               ref={inputRef}
               type="text" value={input} onChange={(e) => setInput(e.target.value)}
               placeholder="Paste incident log or describe an infrastructure issue..."
-              className="w-full bg-transparent text-gray-900 px-5 py-3.5 outline-none font-medium text-sm"
+              className="w-full bg-transparent text-gray-900 px-3 py-3.5 outline-none font-medium text-sm"
               disabled={isProcessing}
             />
-            <button type="submit" disabled={!input.trim() || isProcessing} className="absolute right-2.5 p-2 bg-gray-900 hover:bg-black disabled:bg-gray-100 disabled:text-gray-400 rounded-xl text-white shadow-sm transition-colors">
+            <button type="submit" disabled={!input.trim() || isProcessing} className="absolute right-2.5 p-2 bg-gray-900 hover:bg-black disabled:bg-gray-100 disabled:text-gray-400 rounded-xl text-white shadow-sm transition-colors shrink-0">
               <Send size={16} />
             </button>
           </form>
@@ -674,7 +752,8 @@ export default function App() {
         const config = isLLM ? llmConfig : slmConfig;
         const setConfig = isLLM ? setLlmConfig : setSlmConfig;
         const modelStatus = isLLM ? status.llm : status.slm;
-        return (
+      
+  return (
           <div className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setActiveModelPanel(null)}>
             <div className="bg-white border border-gray-200 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
               
@@ -773,11 +852,31 @@ export default function App() {
                           });
                           const result = await resp.json();
                           const ts2 = new Date().toLocaleTimeString();
-                          setConfig(prev => ({ ...prev, logs: [...prev.logs.slice(-29), { 
-                            ts: ts2, 
-                            type: result.status === 'online' ? 'ok' : 'err', 
-                            msg: result.message 
-                          }] }));
+                          
+                          let newName = null;
+                          if (result.status === 'online' && result.models && result.models.length > 0) {
+                              newName = result.models[0];
+                              // Sync the dynamically discovered name back to the backend
+                              await fetch('http://localhost:8000/api/config', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ model_type: activeModelPanel, name: newName })
+                              }).catch(() => {});
+                          }
+
+                          setConfig(prev => {
+                            const newConfig = { ...prev };
+                            if (newName) {
+                                newConfig.name = newName;
+                            }
+                            
+                            newConfig.logs = [...prev.logs.slice(-29), { 
+                                ts: ts2, 
+                                type: result.status === 'online' ? 'ok' : 'err', 
+                                msg: result.message 
+                            }];
+                            return newConfig;
+                          });
                         } catch {
                           const ts2 = new Date().toLocaleTimeString();
                           setConfig(prev => ({ ...prev, logs: [...prev.logs.slice(-29), { ts: ts2, type: 'err', msg: 'Backend unreachable' }] }));

@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 from src.optimization.pipeline import OptimizationFunnel
 
 def main():
+    """Main execution entry point for Phase 1 optimization funnel CLI."""
     parser = argparse.ArgumentParser(description="Phase 1: Input Processing & Optimization Funnel")
     parser.add_argument("--log", type=str, help="Raw incident log string or path to log file", required=True)
     parser.add_argument("--history", type=str, help="Chat history string or path to history file", default="")
@@ -46,6 +47,7 @@ def main():
             print(f"Compressed payload successfully written to {args.output}")
         except Exception as e:
             print(f"Error writing to output file: {e}")
+            sys.exit(1)
     else:
         print("\n=== FINAL COMPRESSED PAYLOAD ===")
         print(compressed_payload)

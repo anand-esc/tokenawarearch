@@ -1,67 +1,51 @@
-# Self-Healing Token Aware Multi-Agent Architecture
+# Self-Healing Token-Aware Multi-Agent Architecture
 
 ## Objective
 
-The objective of this project is to create an advanced Site Reliability Engineering (SRE) automation framework. It aims to ingest massive, noisy incident alerts (like Datadog webhooks or Kubernetes stack traces) and autonomously remediate them using a multi-agent system. 
+The objective of this project is to provide an advanced Site Reliability Engineering (SRE) automation framework. It aims to ingest high-volume, noisy incident alerts and autonomously remediate them using a multi-agent system. 
 
-The core differentiator of this architecture is its Token Awareness. Large Language Models (LLMs) are expensive, and feeding them endless megabytes of raw logs is cost-prohibitive and inefficient. This architecture introduces a highly optimized funnel that shrinks, summarizes, and prunes incident data locally before securely routing it to either a local Small Language Model (SLM) or a cloud-based Frontier LLM, depending on complexity and budget.
+The core differentiator of this architecture is its token-awareness. Large Language Models (LLMs) incur significant API costs, and feeding them unoptimized raw logs is inefficient. This architecture introduces a highly optimized pipeline that shrinks, summarizes, and prunes incident data locally before securely routing it to either a local Small Language Model (SLM) or a cloud-based Frontier LLM, depending on calculated incident complexity and severity.
 
 ## Goals
 
-1.  Cost Efficiency: Drastically reduce API costs by executing pre-processing, summarization, and simple remediations on local hardware using SLMs, reserving cloud LLMs for complex, high-severity issues.
-2.  Token Optimization: Prevent context window exhaustion and save budget by aggressively compressing logs and chat histories while preserving semantic meaning.
-3.  Self-Healing and Auto-Remediation: Safely execute scripts and fix infrastructure issues autonomously when confidence is high.
-4.  Continuous Learning: Implement a feedback loop that evaluates past resolutions and updates routing policy weights, allowing the system to learn when to trust local models versus cloud models.
+1. Cost Efficiency: Reduce API costs by executing pre-processing, summarization, and trivial remediations on local hardware using SLMs, reserving cloud LLMs for complex, high-severity issues.
+2. Token Optimization: Prevent context window exhaustion and save budget by aggressively compressing logs and chat histories while preserving semantic meaning.
+3. Self-Healing and Auto-Remediation: Safely execute scripts and fix infrastructure issues autonomously, utilizing a risk assessor gatekeeper.
+4. Dynamic Architecture: Utilize a thread-safe FastAPI backend that dynamically integrates model factories and agent schedulers to adapt to varying LLM providers without hardcoded constraints.
 
 ## Project Phases
 
-### Phase 1: Input Processing & Optimization (The Funnel)
+### Phase 1: Input Processing and Optimization
 
 This phase acts as the ingestion point. It heavily compresses chaotic data into a token-efficient payload.
--   Query Rewriting: Normalizes raw logs or JSON webhooks into readable text.
--   Chat History Summarization: Uses local models (like BART) to condense past troubleshooting context.
--   Semantic Chunking: Breaks large stack traces into safe, overlapping chunks.
--   Context Pruning: Uses Sentence Transformers to calculate cosine similarity, dropping redundant log lines.
--   Prompt Compression: Shrinks the payload further by dropping stopwords and filler tokens using LLMLingua.
+- Query Rewriting: Normalizes raw logs or JSON webhooks into readable text.
+- Semantic Chunking: Breaks large stack traces into safe, overlapping chunks.
+- Context Pruning: Drops redundant log lines to preserve budget.
+- Prompt Compression: Shrinks the payload further by removing non-essential tokens.
 
-### Phase 2: Intelligent Routing Gatekeeper (The Brain)
+### Phase 2: Intelligent Routing Gatekeeper
 
-This phase decides where the compressed payload should go.
--   Global Dynamic Routing: The ingress point that distributes the payload based on internal policy weights.
--   BERT Classifier: Evaluates the severity and complexity of the incident.
--   Token Budgeting: Calculates maximum allowable API spend for the incident.
--   Dynamic Model Routing: Decides whether to route the incident to a local SLM (e.g., Qwen 1.5B) for low-complexity issues or a cloud LLM (e.g., GPT-4) for high-complexity issues.
+This phase decides where the compressed payload should be routed.
+- Global Dynamic Routing: The ingress point that distributes the payload based on internal policy weights.
+- Severity and Complexity Analysis: Evaluates the incident to determine the risk level.
+- Token Budgeting: Calculates maximum allowable API spend and token heuristic limits for the incident.
+- Dynamic Model Routing: Decides whether to route the incident to a local SLM for low-complexity issues or a cloud LLM for high-complexity issues based on the calculated budget.
 
-### Phase 3: Multi-Agent Model Execution & Action Layer
+### Phase 3: Multi-Agent Model Execution
 
 This phase handles the actual troubleshooting and remediation.
--   Multi-Agent Scheduling: Coordinates tasks among specialized agents.
--   Action Assessment: Evaluates the generated solution for risk and confidence.
--   Auto-Remediation: Safely executes fixes automatically.
--   SRE Dashboard: Routes risky or destructive fixes to human operators for review and approval.
+- Model Factory: Dynamically instantiates the correct model interfaces based on runtime configurations and routing decisions.
+- Agent Scheduler: Coordinates tasks among specialized personas (e.g., Database Administrator, Network Engineer).
+- Thread-Safe Execution: Executes heavy synchronous operations and model inferences within isolated threadpools to prevent ASGI event loop blocking.
 
-### Phase 4: Continuous Learning (The Feedback Loop)
+### Phase 4: Action Layer and Risk Assessment
 
-This phase handles the Reinforcement Learning aspect.
--   LLM as a Judge: A highly capable LLM reviews the full incident resolution flow and scores the performance.
--   Tabular Q-Learning: Generates a reward or penalty based on resolution time, accuracy, and cost.
--   Policy Weight Updates: The Q-Table updates dynamically. This continuous feedback loop teaches the Global Router which incidents can be safely handled by cheaper local SLMs in the future, optimizing long-term costs.
+This phase evaluates and executes the generated solution.
+- Action Assessment: Evaluates the generated solution for risk and confidence.
+- Auto-Remediation: Safely executes fixes automatically for trusted scenarios.
+- SRE Dashboard: Routes risky or destructive fixes to human operators for manual review, trace inspection, and execution approval.
 
-### Phase 5: Continuous Training & Fine-Tuning
-
-To increase the baseline accuracy of the models over time, the system incorporates Domain-Specific Fine-Tuning.
--   Synthetic Data Generation: Uses massive frontier LLMs (via Knowledge Distillation) to generate thousands of realistic incident logs and bash remediations.
--   QLoRA Fine-Tuning: The generated dataset is used to fine-tune the Local SLM (Qwen) specifically on SRE tasks, making it an expert at writing remediation scripts.
--   BERT Supervised Tuning: Historical labeled incidents are used to fine-tune the Phase 2 zero-shot classifier, driving triage accuracy to 95%+.
-
-## Architecture and Flow
-
-### Architecture Diagram
-
-![Architecture Diagram](architecture_diagram/architecture_diagram.png)
-
-<details>
-<summary>View Interactive Mermaid Diagram</summary>
+## Architecture
 
 ```mermaid
 graph TD
@@ -70,183 +54,48 @@ graph TD
     classDef phase2 fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#e65100,rx:5px,ry:5px
     classDef phase3 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20,rx:5px,ry:5px
     classDef action fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px,color:#4a148c,rx:5px,ry:5px
-    classDef feedback fill:#e0f7fa,stroke:#00838f,stroke-width:2px,color:#006064,rx:5px,ry:5px
     classDef global fill:#fff8e1,stroke:#fbc02d,stroke-width:2px,color:#f57f17,rx:5px,ry:5px
 
-    A([Incident Trigger<br/>Server Spike, Webhook, Error Logs]):::trigger --> B
+    A([Incident Trigger / Alert]):::trigger --> B
     
-    subgraph Phase1 ["Phase 1: Input Processing & Optimization (The Funnel)"]
-        B[1. Chat History Summarization]:::phase1 --> C[2. Query Rewriting]:::phase1
-        C --> D[3. Semantic Chunking]:::phase1
-        D --> E[4. Context Pruning]:::phase1
-        E --> F[5. Prompt Compression]:::phase1
+    subgraph Phase1 ["Phase 1: Input Processing & Optimization"]
+        B[Query Rewriting & Summarization]:::phase1 --> C[Semantic Chunking]:::phase1
+        C --> D[Context Pruning & Prompt Compression]:::phase1
     end
 
-    F --> |Highly Compressed Minimal Payload| G
+    D --> |Compressed Payload| E
     
-    subgraph Phase2 ["Phase 2: Intelligent Routing Gatekeeper (The Brain)"]
-        G{Global Dynamic Routing}:::global
-        G --> H[BERT Classifier<br/>Severity & Complexity]:::phase2
-        G --> I[Token Budgeting<br/>Calculates Max API Spend]:::phase2
-        H --> J{Dynamic Model Routing<br/>Evaluates Complexity vs. Budget}:::phase2
-        I --> J
+    subgraph Phase2 ["Phase 2: Intelligent Routing Gatekeeper"]
+        E{Dynamic Router}:::global
+        E --> F[Severity & Complexity Analysis]:::phase2
+        E --> G[Token Budgeting & Cost Calculation]:::phase2
+        F --> H{Dynamic Model Routing}:::phase2
+        G --> H
     end
     
-    J --> |Low/Medium Complexity| L_SLM
-    J --> |High Complexity| C_LLM
+    H --> |Low/Medium Complexity| L_SLM
+    H --> |High Complexity| C_LLM
 
     subgraph Phase3 ["Phase 3: Multi-Agent Model Execution"]
-        subgraph Local ["Local SLM"]
-            L_SLM[Hardware: Local i5 / 16GB RAM]:::phase3 --> L_Model[Model: Qwen 1.5B via Ollama]:::phase3
-            L_Model --> L_Sched[Multi-Agent Token Scheduling]:::phase3
-        end
-        
-        subgraph Cloud ["Cloud LLM"]
-            C_LLM[Hardware: Cloud API Paid]:::phase3 --> C_Model[Model: Frontier LLM e.g., GPT-4]:::phase3
-            C_Model --> C_Sched[Multi-Agent Token Scheduling]:::phase3
-        end
+        L_SLM[Local SLM Node]:::phase3 --> Scheduler[Agent Scheduler]:::phase3
+        C_LLM[Cloud LLM Node]:::phase3 --> Scheduler
+        Scheduler --> Factory[Dynamic Model Factory]:::phase3
     end
 
-    L_Sched --> K
-    C_Sched --> K
+    Factory --> I
     
-    K[Response Compression<br/>Shrinks Generated Solution]:::phase1 --> L{Action Assessment}:::action
-    
-    subgraph ActionLayer ["SRE Dashboard / Auto-Remediation (The Action Layer)"]
-        L --> |Safe & High Confidence| M[Auto-Remediation<br/>Executes Fix Automatically]:::action
-        L --> |Risky/Destructive or Low Confidence| N[SRE Dashboard<br/>Human Review & Approval]:::action
+    subgraph Phase4 ["Phase 4: Action Layer & Risk Assessment"]
+        I{Risk Assessment Gatekeeper}:::action
+        I --> |Safe & High Confidence| J[Auto-Remediation Execution]:::action
+        I --> |Risky / Low Confidence| K[SRE Dashboard Human Review]:::action
     end
     
-    M --> O([Execution Complete / Incident Resolved]):::action
-    N --> |Approved by Human| O
-    
-    subgraph Phase4 ["Phase 4: Continuous Learning (The Feedback Loop)"]
-        O --> P[1. LLM as Judge<br/>Scores SLM/LLM Resolution]:::feedback
-        P --> Q[2. Tabular Q-Learning<br/>Generates Reward/Penalty]:::feedback
-    end
-    
-    Q -.-> |Updates Policy Weightings| G
-
-    subgraph Phase5 ["Phase 5: Continuous Training & Fine-Tuning"]
-        S[Synthetic Data Generation<br/>& Historical Exports]:::feedback --> T[QLoRA Fine-Tuning<br/>SLM Model Upgrade]:::feedback
-        S --> U[Supervised Fine-Tuning<br/>BERT Classifier Upgrade]:::feedback
-    end
-
-    T -.-> |Deploys Smarter Weights| L_Model
-    U -.-> |Deploys Smarter Weights| H
+    J --> L([Incident Resolved]):::action
+    K --> |Approved by Operator| J
 ```
-</details>
 
-### Flow Diagram
+## Continuous Learning and Feedback
 
-![Flow Diagram](flow_diagram/flow_diagram.png)
+The Reinforcement Learning mechanism connects the resolution layer back to the routing layer. After an incident is resolved, the system reviews the actions taken. The system computes a reward (if the issue was solved efficiently by an SLM) or a penalty (if the SLM failed and it had to be escalated). 
 
-<details>
-<summary>View Interactive Mermaid Diagram</summary>
-
-```mermaid
-flowchart TD
-    %% Node Definitions with Standard Flowchart Shapes
-    Start([Incoming Incident Alert])
-    InputData[/Raw Logs, Webhooks, Spikes/]
-    
-    %% Phase 1
-    P1A[Chat History Summarization]
-    P1B[Query Rewriting]
-    P1C[Semantic Chunking]
-    P1D[Context Pruning]
-    P1E[Prompt Compression]
-    CompressedData[(Highly Compressed Payload)]
-    
-    %% Phase 2
-    RouterProcess[Global Dynamic Router Ingress]
-    Classifier[BERT Classifier: Severity & Complexity]
-    Budget[Token Budgeting: Max Allowable Spend]
-    RouteDecision{Complexity vs Budget}
-    
-    %% Phase 3
-    LocalNode[Execute Local SLM Node<br/>Qwen 1.5B via Ollama]
-    CloudNode[Execute Cloud LLM Node<br/>Frontier Model via API]
-    RespCompress[Response Compression]
-    
-    %% Action Layer
-    RiskAssessment{Risk & Confidence Check}
-    AutoFix[Auto-Remediation<br/>Execute Script/Fix]
-    HumanReview[SRE Dashboard<br/>Human Review]
-    HumanDecision{Human Approves?}
-    Resolved([Incident Resolved])
-    EndAbort([Incident Escalated / Aborted])
-    
-    %% Phase 4
-    Judge[LLM as Judge<br/>Evaluate Full Resolution]
-    RL[Tabular Q-Learning<br/>Calculate Reward/Penalty]
-    UpdateWeights[(Update Routing Policy Weights)]
-
-    %% Phase 5
-    SyncData[(Synthetic Data / Historical Logs)]
-    QLoRA[QLoRA Fine-Tuning]
-    BertTune[Supervised Fine-Tuning]
-
-    %% Flow Connections
-    Start --> InputData
-    InputData --> P1A
-    P1A --> P1B
-    P1B --> P1C
-    P1C --> P1D
-    P1D --> P1E
-    P1E --> CompressedData
-    
-    CompressedData --> RouterProcess
-    RouterProcess --> Classifier
-    RouterProcess --> Budget
-    Classifier --> RouteDecision
-    Budget --> RouteDecision
-    
-    RouteDecision -- "Low/Medium Complexity" --> LocalNode
-    RouteDecision -- "High Complexity" --> CloudNode
-    
-    LocalNode --> RespCompress
-    CloudNode --> RespCompress
-    
-    RespCompress --> RiskAssessment
-    
-    RiskAssessment -- "Safe & High Confidence" --> AutoFix
-    RiskAssessment -- "Risky, Destructive, Low Confidence" --> HumanReview
-    
-    HumanReview --> HumanDecision
-    HumanDecision -- "Yes" --> AutoFix
-    HumanDecision -- "No / Abort" --> EndAbort
-    
-    AutoFix --> Resolved
-    
-    Resolved --> Judge
-    Judge --> RL
-    RL --> UpdateWeights
-    UpdateWeights -.->|Feedback Loop| RouterProcess
-
-    %% Phase 5 Connections
-    SyncData --> QLoRA
-    SyncData --> BertTune
-    QLoRA -.->|Update Model| LocalNode
-    BertTune -.->|Update Classifier| Classifier
-
-    %% Styling
-    classDef startend fill:#ffcdd2,stroke:#b71c1c,stroke-width:2px,color:#b71c1c
-    classDef inputdata fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#f57f17
-    classDef process fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1
-    classDef database fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#004d40
-    classDef decision fill:#ffe0b2,stroke:#e65100,stroke-width:2px,color:#e65100
-    
-    class Start,Resolved,EndAbort startend;
-    class InputData inputdata;
-    class P1A,P1B,P1C,P1D,P1E,RouterProcess,Classifier,Budget,LocalNode,CloudNode,RespCompress,AutoFix,HumanReview,Judge,RL process;
-    class CompressedData,UpdateWeights database;
-    class RouteDecision,RiskAssessment,HumanDecision decision;
-```
-</details>
-
-## Reinforcement Learning in Global Routing
-
-The Reinforcement Learning (RL) mechanism connects Phase 4 back to Phase 2. After an incident is resolved (either successfully or unsuccessfully), an "LLM as a Judge" reviews the actions taken. The RL system computes a reward (if the issue was solved quickly and cheaply by an SLM) or a penalty (if the SLM failed and it had to be escalated). 
-
-These rewards and penalties dynamically adjust the weights inside the Global Dynamic Router. Over time, the router learns to trust the local SLM for specific classes of errors that previously required a cloud LLM, creating a continuously self-optimizing and increasingly cost-effective SRE architecture.
+These rewards and penalties dynamically adjust the Q-Table weights inside the dynamic router. Over time, the router learns to trust the local SLM for specific classes of errors that previously required a cloud LLM, creating a continuously self-optimizing and increasingly cost-effective SRE architecture.

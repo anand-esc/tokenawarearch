@@ -31,46 +31,55 @@ class ModelFactory:
         self.cloud_model_name = cloud_model_name if cloud_model_name else Config.CLOUD_LLM_NAME
         self.temperature = Config.MODEL_TEMPERATURE
 
-    def get_model(self, routing_decision: str) -> Any:
+    def get_model(self, routing_decision: str, runtime_config: dict = None) -> Any:
         """Returns a configured LangChain chat model instance.
 
         Args:
             routing_decision (str): Either 'LOCAL_SLM' or 'CLOUD_LLM'.
+            runtime_config (dict): Runtime configurations (api_key, endpoint, etc).
 
         Returns:
             BaseChatModel: A LangChain chat model object ready for inference.
         """
+        runtime_config = runtime_config or {}
+        
         if routing_decision == "CLOUD_LLM":
-            self.logger.info(f"Instantiating Cloud LLM: {self.cloud_model_name}")
-            api_key = os.environ.get("GOOGLE_API_KEY")
+            # Use runtime config first, fallback to class attr
+            cloud_model_name = runtime_config.get("llm_name") or self.cloud_model_name
+            self.logger.info(f"Instantiating Cloud LLM: {cloud_model_name}")
+            api_key = runtime_config.get("llm_api_key") or os.environ.get("GOOGLE_API_KEY")
             
             if not api_key or not ChatGoogleGenerativeAI:
                 self.logger.warning("GOOGLE_API_KEY is not set or SDK missing. Falling back to Local SLM.")
-                return self._get_local_model()
+                return self._get_local_model(runtime_config)
             
             try:
                 return ChatGoogleGenerativeAI(
-                    model=self.cloud_model_name,
+                    model=cloud_model_name,
                     temperature=self.temperature, # Low temperature for deterministic SRE responses
                     google_api_key=api_key
                 )
             except Exception as e:
                 self.logger.error(f"Failed to initialize Cloud LLM: {e}. Falling back to Local.")
-                return self._get_local_model()
+                return self._get_local_model(runtime_config)
         else:
-            return self._get_local_model()
+            return self._get_local_model(runtime_config)
 
-    def _get_local_model(self) -> Any:
+    def _get_local_model(self, runtime_config: dict) -> Any:
         """Internal helper to instantiate the local Ollama model."""
-        self.logger.info(f"Instantiating Local SLM: Ollama ({self.local_model_name})")
+        local_model_name = runtime_config.get("slm_name") or self.local_model_name
+        base_url = runtime_config.get("slm_endpoint") or "http://localhost:11434"
+        
+        self.logger.info(f"Instantiating Local SLM: Ollama ({local_model_name}) at {base_url}")
         if not ChatOllama:
             self.logger.warning("ChatOllama not found. Returning Mock Model.")
             return "MOCK_LOCAL_SLM"
             
         try:
             return ChatOllama(
-                model=self.local_model_name,
-                temperature=self.temperature
+                model=local_model_name,
+                temperature=self.temperature,
+                base_url=base_url
             )
         except Exception as e:
             self.logger.error(f"Failed to initialize Local SLM: {e}")
