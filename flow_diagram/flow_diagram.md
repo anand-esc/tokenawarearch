@@ -1,6 +1,10 @@
-# Self-Healing SRE Agent: Standard Flowchart
+# Incident Execution Flow
 
-This flowchart uses standard flowchart symbols (decisions as diamonds, processes as rectangles, data as parallelograms/databases) to represent the entire pipeline from top to bottom.
+This document details the step-by-step flowchart of an incident moving through the Token-Aware Multi-Agent Architecture.
+
+## Flow Diagram
+
+![Flow Diagram](flow_diagram.png)
 
 ```mermaid
 flowchart TD
@@ -11,71 +15,51 @@ flowchart TD
     %% Phase 1
     P1A[Chat History Summarization]
     P1B[Query Rewriting]
-    P1C[Semantic Chunking]
-    P1D[Context Pruning]
     P1E[Prompt Compression]
-    CompressedData[(Highly Compressed Payload)]
+    CompressedData[(Compressed Payload)]
     
     %% Phase 2
-    RouterProcess[Global Dynamic Router Ingress]
-    Classifier[BERT Classifier: Severity & Complexity]
-    Budget[Token Budgeting: Max Allowable Spend]
+    RouterProcess[Global Dynamic Router]
+    Budget[Token Budgeting & Cost Analysis]
     RouteDecision{Complexity vs Budget}
     
     %% Phase 3
-    LocalNode[Execute Local SLM Node<br/>Qwen 1.5B via Ollama]
-    CloudNode[Execute Cloud LLM Node<br/>Frontier Model via API]
-    RespCompress[Response Compression]
+    LocalNode[Execute Local SLM Node]
+    CloudNode[Execute Cloud LLM Node]
     
     %% Action Layer
-    RiskAssessment{Risk & Confidence Check}
+    RiskAssessment{Risk Assessor}
     AutoFix[Auto-Remediation<br/>Execute Script/Fix]
     HumanReview[SRE Dashboard<br/>Human Review]
     HumanDecision{Human Approves?}
     Resolved([Incident Resolved])
     EndAbort([Incident Escalated / Aborted])
-    
-    %% Phase 4
-    Judge[LLM as Judge<br/>Evaluate Full Resolution]
-    RL[Reinforcement Learning<br/>Calculate Reward/Penalty]
-    UpdateWeights[(Update Routing Policy Weights)]
 
     %% Flow Connections
     Start --> InputData
     InputData --> P1A
     P1A --> P1B
-    P1B --> P1C
-    P1C --> P1D
-    P1D --> P1E
+    P1B --> P1E
     P1E --> CompressedData
     
     CompressedData --> RouterProcess
-    RouterProcess --> Classifier
     RouterProcess --> Budget
-    Classifier --> RouteDecision
     Budget --> RouteDecision
     
-    RouteDecision -- "Low/Medium Complexity" --> LocalNode
+    RouteDecision -- "Low Complexity" --> LocalNode
     RouteDecision -- "High Complexity" --> CloudNode
     
-    LocalNode --> RespCompress
-    CloudNode --> RespCompress
+    LocalNode --> RiskAssessment
+    CloudNode --> RiskAssessment
     
-    RespCompress --> RiskAssessment
-    
-    RiskAssessment -- "Safe & High Confidence" --> AutoFix
-    RiskAssessment -- "Risky, Destructive, Low Confidence" --> HumanReview
+    RiskAssessment -- "Safe" --> AutoFix
+    RiskAssessment -- "Unsafe/Risky" --> HumanReview
     
     HumanReview --> HumanDecision
     HumanDecision -- "Yes" --> AutoFix
-    HumanDecision -- "No / Abort" --> EndAbort
+    HumanDecision -- "No" --> EndAbort
     
     AutoFix --> Resolved
-    
-    Resolved --> Judge
-    Judge --> RL
-    RL --> UpdateWeights
-    UpdateWeights -.->|Feedback Loop| RouterProcess
 
     %% Styling
     classDef startend fill:#ffcdd2,stroke:#b71c1c,stroke-width:2px,color:#b71c1c
@@ -86,7 +70,7 @@ flowchart TD
     
     class Start,Resolved,EndAbort startend;
     class InputData inputdata;
-    class P1A,P1B,P1C,P1D,P1E,RouterProcess,Classifier,Budget,LocalNode,CloudNode,RespCompress,AutoFix,HumanReview,Judge,RL process;
-    class CompressedData,UpdateWeights database;
+    class P1A,P1B,P1E,RouterProcess,Budget,LocalNode,CloudNode,AutoFix,HumanReview process;
+    class CompressedData database;
     class RouteDecision,RiskAssessment,HumanDecision decision;
 ```
