@@ -1,6 +1,7 @@
 import logging
 from .classifier import IncidentClassifier
 from .budgeting import TokenBudgeter
+from src.evaluation.q_learning import QLearningRouter
 
 class GlobalDynamicRouter:
     """The central intelligence node for Phase 2.
@@ -20,6 +21,7 @@ class GlobalDynamicRouter:
         try:
             self.classifier = IncidentClassifier()
             self.budgeter = TokenBudgeter()
+            self.q_router = QLearningRouter()
         except Exception as e:
             self.logger.error(f"Failed to initialize router components: {e}")
             raise RuntimeError("Router initialization failed") from e
@@ -44,16 +46,19 @@ class GlobalDynamicRouter:
             # 2. Determine Budget based on Severity
             budget = self.budgeter.calculate_budget(severity)
 
-            # 3. Routing Logic: Match Complexity vs Budget
+            # 3. Routing Logic: Match Complexity vs Budget via Q-Learning!
             if budget.get("requires_local_only", False):
                 model_target = "LOCAL_SLM"
                 reason = "Budget restricted to $0.00 due to low severity."
-            elif complexity >= 7 and budget.get("max_spend_usd", 0) > 0.0:
-                model_target = "CLOUD_LLM"
-                reason = "High complexity requires frontier model. Budget is available."
             else:
-                model_target = "LOCAL_SLM"
-                reason = "Low to moderate complexity. Local SLM is sufficient and saves budget."
+                # Query the RL Brain!
+                action = self.q_router.choose_action(severity, complexity)
+                if action == 1 and budget.get("max_spend_usd", 0) > 0.0:
+                    model_target = "CLOUD_LLM"
+                    reason = "Q-Learning Brain chose Cloud LLM. Budget is available."
+                else:
+                    model_target = "LOCAL_SLM"
+                    reason = "Q-Learning Brain chose Local SLM (or insufficient budget for Cloud override)."
 
             routing_decision = {
                 "model_target": model_target,

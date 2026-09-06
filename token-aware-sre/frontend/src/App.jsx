@@ -1,27 +1,44 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { 
   Settings, MessageSquare, Plus, 
   Send, Database, Bot, ShieldAlert, ArrowRight, Activity, 
   PanelLeft, AlertTriangle, GitCompare, BrainCircuit, Play,
   RefreshCw, X, Clock, Shield,
-  Trash2, Code, Calculator
+  Trash2, Code, Calculator, GitBranch
 } from 'lucide-react';
 
 export default function App() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    const savedId = localStorage.getItem('current_session_id');
+    if (savedId) {
+      try {
+        const saved = JSON.parse(localStorage.getItem('sre_sessions') || '[]');
+        const active = saved.find(s => s.id === savedId);
+        return active ? (active.messages || []) : [];
+      } catch (e) {}
+    }
+    return [];
+  });
   const [input, setInput] = useState('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isQTableOpen, setIsQTableOpen] = useState(false);
   const [sessions, setSessions] = useState(() => {
     try {
-      const stored = localStorage.getItem('sre_sessions');
-      
-    } catch {}
-    const mockData = [{"id": "session_1", "title": "K8s Pod Eviction (OOM)", "timestamp": "2026-09-03T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "[CRITICAL] Kubernetes Node-8 unresponsive. Kubelet PLEG timeout. Pods Evicted. Memory threshold 98% exceeded. Redis-master OOMKilled."}, {"role": "assistant", "content": "#!/bin/bash\nkubectl cordon node-8\nkubectl scale deployment redis-master --replicas=2\nkubectl drain node-8 --ignore-daemonsets", "transparency": {"original_prompt": "[CRITICAL] Kubernetes Node-8 unresponsive. Kubelet PLEG timeout...", "compressed_prompt": "Kubernetes Node-8 unresponsive. PLEG timeout. Pods Evicted. Memory >98%. Redis-master OOMKilled.", "original_chars": 120, "compressed_chars": 90, "reduction_percent": 25, "severity": 9, "complexity": 8, "model_target": "CLOUD_LLM", "budget_usd": 0.05, "routing_reason": "High severity threshold breached.", "is_safe": true, "risk_score": 10, "risk_reason": "Standard Kubernetes maintenance commands.", "latency_ms": 1250, "t_optimize_ms": 150, "t_route_ms": 120, "t_execute_ms": 980, "estimated_savings_usd": 0.01}}, {"role": "user", "content": "Execution Complete:\nNode cordoned and drained successfully."}, {"role": "assistant", "content": "Excellent. I have verified that memory thresholds on the remaining nodes are stabilizing at 45% and Redis-master has successfully failed over to a healthy pod. The cascading OOM event is now fully mitigated. Is there anything else you need investigated?"}]}, {"id": "session_2", "title": "Cron Job Syntax", "timestamp": "2026-09-03T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "How do I write a cron expression to run a database backup script every Tuesday at 3:15 AM?"}, {"role": "assistant", "content": "#!/bin/bash\necho '15 3 * * 2 /path/to/backup.sh' | crontab -", "transparency": {"original_prompt": "How do I write a cron expression to run a database backup script every Tuesday at 3:15 AM?", "compressed_prompt": "cron expression database backup script Tuesday 3:15 AM", "original_chars": 90, "compressed_chars": 54, "reduction_percent": 40, "severity": 1, "complexity": 2, "model_target": "LOCAL_SLM", "budget_usd": 0.0, "routing_reason": "Budget restricted to $0.00 due to low severity.", "is_safe": true, "risk_score": 5, "risk_reason": "No destructive actions detected.", "latency_ms": 800, "t_optimize_ms": 80, "t_route_ms": 60, "t_execute_ms": 660, "estimated_savings_usd": 0.02}}]}, {"id": "session_3", "title": "SSL Certificate Expired", "timestamp": "2026-09-02T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "[FATAL] SSL/TLS certificate expired on loadbalancer-primary. Ingress controller rejecting all HTTPS traffic. 100% downtime on public API."}, {"role": "assistant", "content": "#!/bin/bash\ncertbot renew --force-renewal\nsystemctl reload nginx", "transparency": {"original_prompt": "[FATAL] SSL/TLS certificate expired on loadbalancer-primary. Ingress controller rejecting all HTTPS traffic.", "compressed_prompt": "SSL/TLS certificate expired loadbalancer-primary. Ingress rejecting HTTPS traffic. 100% downtime public API.", "original_chars": 139, "compressed_chars": 108, "reduction_percent": 22, "severity": 10, "complexity": 5, "model_target": "CLOUD_LLM", "budget_usd": 0.1, "routing_reason": "Max severity triggers cloud LLM override.", "is_safe": true, "risk_score": 15, "risk_reason": "Standard certificate renewal.", "latency_ms": 1100, "t_optimize_ms": 110, "t_route_ms": 90, "t_execute_ms": 900, "estimated_savings_usd": 0.008}}, {"role": "user", "content": "Execution output:\nSuccess! Certificate saved at /etc/letsencrypt/live/primary/fullchain.pem"}, {"role": "assistant", "content": "Great. The new certificate is now loaded into the ingress controller. HTTPS traffic is flowing normally again with 200 OK responses. Downtime resolved."}]}, {"id": "session_4", "title": "Postgres Slow Queries", "timestamp": "2026-09-02T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "[WARN] Postgres slow query log detected: SELECT * FROM orders WHERE status='pending' taking > 2000ms. System load increasing."}, {"role": "assistant", "content": "#!/bin/bash\npsql -U postgres -c \"CREATE INDEX CONCURRENTLY idx_orders_status ON orders(status);\"", "transparency": {"original_prompt": "[WARN] Postgres slow query log detected: SELECT * FROM orders WHERE status='pending' taking > 2000ms. System load increasing.", "compressed_prompt": "Postgres slow query: SELECT * FROM orders WHERE status='pending' > 2000ms.", "original_chars": 125, "compressed_chars": 76, "reduction_percent": 39, "severity": 4, "complexity": 6, "model_target": "CLOUD_LLM", "budget_usd": 0.02, "routing_reason": "Complexity requires capable LLM planning.", "is_safe": true, "risk_score": 40, "risk_reason": "Concurrent index creation is safe but alters database.", "latency_ms": 1400, "t_optimize_ms": 100, "t_route_ms": 120, "t_execute_ms": 1180, "estimated_savings_usd": 0.015}}, {"role": "user", "content": "Execution output:\nCREATE INDEX"}, {"role": "assistant", "content": "Index created concurrently without locking the table. Query latency for SELECT * FROM orders WHERE status='pending' has dropped from >2000ms down to ~15ms. System load is normalizing. I recommend setting up an alert for this table if the row count exceeds 10M."}]}, {"id": "session_5", "title": "ElasticSearch Split-Brain", "timestamp": "2026-08-29T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "[CRITICAL] ElasticSearch cluster split-brain detected. Node-3 and Node-4 have elected different master nodes. Data write operations failing with 503 Service Unavailable."}, {"role": "assistant", "content": "MANUAL_INTERVENTION_REQUIRED", "transparency": {"original_prompt": "[CRITICAL] ElasticSearch cluster split-brain detected. Node-3 and Node-4 have elected different master nodes.", "compressed_prompt": "ElasticSearch cluster split-brain Node-3 Node-4 different master nodes. Writes failing 503.", "original_chars": 172, "compressed_chars": 92, "reduction_percent": 46, "severity": 8, "complexity": 9, "model_target": "CLOUD_LLM", "budget_usd": 0.08, "routing_reason": "Architectural complexity demands Cloud LLM.", "is_safe": true, "risk_score": 0, "risk_reason": "Model correctly deferred to human.", "latency_ms": 1800, "t_optimize_ms": 140, "t_route_ms": 160, "t_execute_ms": 1500, "estimated_savings_usd": 0.025}}]}, {"id": "session_6", "title": "High CPU Alert", "timestamp": "2026-08-29T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "[WARNING] CPU usage on app-worker-03 has sustained 85% for 15 minutes. Load average: 4.5. Top process: python3 celery_worker.py."}, {"role": "assistant", "content": "#!/bin/bash\nsystemctl restart celery_worker\nkill -9 $(pgrep -f 'celery worker')", "transparency": {"original_prompt": "[WARNING] CPU usage on app-worker-03 has sustained 85% for 15 minutes. Load average: 4.5. Top process: python3 celery_worker.py.", "compressed_prompt": "CPU usage app-worker-03 85% 15 minutes. Load 4.5. Top process python3 celery_worker.py.", "original_chars": 128, "compressed_chars": 89, "reduction_percent": 30, "severity": 5, "complexity": 4, "model_target": "LOCAL_SLM", "budget_usd": 0.01, "routing_reason": "Q-Table policy highly favors SLM for moderate CPU restarts.", "is_safe": false, "risk_score": 65, "risk_reason": "kill -9 is aggressive and potentially unsafe.", "latency_ms": 850, "t_optimize_ms": 90, "t_route_ms": 50, "t_execute_ms": 710, "estimated_savings_usd": 0.03}}]}, {"id": "session_7", "title": "Nginx Log Rotation", "timestamp": "2026-08-29T16:26:24.278517+00:00", "messages": [{"role": "user", "content": "Nginx access logs are getting too large and eating up disk space. How do I configure logrotate to keep only 7 days of compressed logs?"}, {"role": "assistant", "content": "#!/bin/bash\necho '/var/log/nginx/*.log {\\n  daily\\n  missingok\\n  rotate 7\\n  compress\\n  delaycompress\\n  notifempty\\n}' > /etc/logrotate.d/nginx_custom", "transparency": {"original_prompt": "Nginx access logs are getting too large and eating up disk space. How do I configure logrotate to keep only 7 days of compressed logs?", "compressed_prompt": "Nginx access logs too large. Configure logrotate keep 7 days compressed logs.", "original_chars": 136, "compressed_chars": 78, "reduction_percent": 42, "severity": 2, "complexity": 3, "model_target": "LOCAL_SLM", "budget_usd": 0.0, "routing_reason": "Trivial configuration generation.", "is_safe": true, "risk_score": 10, "risk_reason": "Standard configuration file write.", "latency_ms": 700, "t_optimize_ms": 80, "t_route_ms": 40, "t_execute_ms": 580, "estimated_savings_usd": 0.02}}]}];
+      const saved = localStorage.getItem('sre_sessions');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    const mockData = [{ id: 'mock-1', title: 'System initialized', messages: [], timestamp: new Date().toISOString() }];
     localStorage.setItem('sre_sessions', JSON.stringify(mockData));
     return mockData;
   });
-  const [currentSessionId, setCurrentSessionId] = useState(null);
+  const [currentSessionId, setCurrentSessionId] = useState(() => localStorage.getItem('current_session_id') || null);
   const [activeTransparency, setActiveTransparency] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -45,6 +62,18 @@ export default function App() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
+  useEffect(() => {
+    fetch('http://localhost:8000/api/config')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.config) {
+          setLlmConfig(prev => ({ ...prev, name: data.config.llm_name || '', apiKey: data.config.llm_api_key || '', endpoint: data.config.llm_endpoint || '' }));
+          setSlmConfig(prev => ({ ...prev, name: data.config.slm_name || '', apiKey: data.config.slm_api_key || '', endpoint: data.config.slm_endpoint || '' }));
+        }
+      })
+      .catch(err => console.error("Failed to load backend config:", err));
+  }, []);
+
   // Auto-save active session
   useEffect(() => {
     if (!currentSessionId || messages.length === 0) return;
@@ -54,6 +83,11 @@ export default function App() {
       return updated;
     });
   }, [messages, currentSessionId]);
+
+  useEffect(() => {
+    if (currentSessionId) localStorage.setItem('current_session_id', currentSessionId);
+    else localStorage.removeItem('current_session_id');
+  }, [currentSessionId]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -267,9 +301,8 @@ export default function App() {
           <div>
             {/* New Chat */}
             <div className="px-4 mt-5">
-              <button onClick={resetChat} className="flex items-center justify-center space-x-2 text-sm font-semibold bg-gray-900 hover:bg-black text-white w-full py-2.5 px-4 rounded-xl transition-all shadow-sm hover:shadow">
-                <Plus size={16} />
-                <span>New Chat</span>
+              <button onClick={resetChat} className="w-full text-center text-sm font-medium bg-gray-800 hover:bg-gray-900 text-white py-2 px-3 rounded-lg transition-all shadow-sm">
+                New Chat
               </button>
             </div>
             
@@ -310,19 +343,19 @@ export default function App() {
             <div className="mt-7 px-4">
               <div className="text-[11px] font-bold text-gray-400 mb-2 uppercase tracking-wider">Testing Tools</div>
               <div className="space-y-1">
-                <button onClick={(e) => handleSend(e, "CRITICAL: Kubernetes Node 4 unresponsive. Pods Evicted. OOMKilled on redis-master-0. Memory threshold 95% exceeded. Cluster autoscaler failing.")} disabled={isProcessing} className="flex items-center space-x-2.5 text-sm font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group">
+                <button onClick={(e) => handleSend(e, "CRITICAL: Kubernetes Node 4 unresponsive. Pods Evicted. OOMKilled on redis-master-0. Memory threshold 95% exceeded. Cluster autoscaler failing.")} disabled={isProcessing} className="flex items-center space-x-2.5 text-xs font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group">
                   <Play size={14} className="text-gray-400 group-hover:text-gray-900 shrink-0" />
                   <span>Simulate Outage</span>
                 </button>
-                <button onClick={(e) => handleSend(e, "Traceback (most recent call last):\n  File \"app/main.py\", line 124, in process_data\n    result = parser.parse(raw_data)\nAttributeError: 'NoneType' object has no attribute 'parse'\nError: Python function parsing failed due to null object reference.")} disabled={isProcessing} className="flex items-center space-x-2.5 text-sm font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group">
+                <button onClick={(e) => handleSend(e, "Traceback (most recent call last):\n  File \"app/main.py\", line 124, in process_data\n    result = parser.parse(raw_data)\nAttributeError: 'NoneType' object has no attribute 'parse'\nError: Python function parsing failed due to null object reference.")} disabled={isProcessing} className="flex items-center space-x-2.5 text-xs font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group">
                   <Code size={14} className="text-gray-400 group-hover:text-gray-900 shrink-0" />
                   <span>Python Function Error</span>
                 </button>
-                <button onClick={(e) => handleSend(e, "[WARN] Database connection pool exhausted. 1000/1000 active connections in use. Query timeout after 30000ms.")} disabled={isProcessing} className="flex items-center space-x-2.5 text-sm font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group">
+                <button onClick={(e) => handleSend(e, "[WARN] Database connection pool exhausted. 1000/1000 active connections in use. Query timeout after 30000ms.")} disabled={isProcessing} className="flex items-center space-x-2.5 text-xs font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group">
                   <Database size={14} className="text-gray-400 group-hover:text-gray-900 shrink-0" />
                   <span>Simulate DB Deadlock</span>
                 </button>
-                <button onClick={(e) => handleSend(e, "What is 25 + 17?")} disabled={isProcessing} className="flex items-center space-x-2.5 text-sm font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group" title="Tests SLM routing on Severity 1 requests">
+                <button onClick={(e) => handleSend(e, "What is 25 + 17?")} disabled={isProcessing} className="flex items-center space-x-2.5 text-xs font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 text-left disabled:opacity-40 disabled:cursor-not-allowed group" title="Tests SLM routing on Severity 1 requests">
                   <Calculator size={14} className="text-gray-400 group-hover:text-gray-900 shrink-0" />
                   <span>Simple Math Test</span>
                 </button>
@@ -332,14 +365,18 @@ export default function App() {
           
           {/* Bottom actions */}
           <div className="p-4 border-t border-gray-100 space-y-0.5">
-            <button onClick={() => { setIsQTableOpen(true); fetchQTable(); }} className="flex items-center space-x-2.5 text-sm font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 group">
+            <button onClick={() => { setIsQTableOpen(true); fetchQTable(); }} className="flex items-center space-x-2.5 text-xs font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 group">
               <BrainCircuit size={16} className="text-gray-400 group-hover:text-gray-900" />
               <span>Q-Learning State</span>
             </button>
-            <button onClick={() => setIsSettingsOpen(true)} className="flex items-center space-x-2.5 text-sm font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 group">
+            <button onClick={() => setIsSettingsOpen(true)} className="flex items-center space-x-2.5 text-xs font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 group">
               <Settings size={16} className="text-gray-400 group-hover:text-gray-600" />
               <span>Settings</span>
             </button>
+            <a href="https://github.com/anand-esc/Self-Healing-Token-Aware-Multi-Agent-Architercture" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2.5 text-xs font-medium hover:bg-gray-50 w-full py-2 px-3 rounded-lg transition-colors text-gray-600 group">
+              <GitBranch size={16} className="text-gray-400 group-hover:text-gray-900" />
+              <span>Repository</span>
+            </a>
           </div>
         </div>
       </div>
@@ -434,7 +471,42 @@ export default function App() {
                          </div>
                          <pre className="font-mono text-[13px] overflow-x-auto text-green-400 leading-relaxed"><code>{msg.content}</code></pre>
                        </div>
-                    ) : msg.content}
+                    ) : (
+                       <div className="markdown-body space-y-3 leading-relaxed">
+                         <ReactMarkdown
+                           remarkPlugins={[remarkGfm]}
+                           components={{
+                             p: ({node, ...props}) => <p className="mb-2 whitespace-pre-wrap" {...props} />,
+                             code({node, className, children, ...props}) {
+                               const match = /language-(\w+)/.exec(className || '');
+                               const strContent = String(children);
+                               const isBlock = match || strContent.includes('\n');
+                               
+                               if (isBlock) {
+                                 return (
+                                   <SyntaxHighlighter
+                                     {...props}
+                                     children={strContent.replace(/\n$/, '')}
+                                     style={vscDarkPlus}
+                                     language={match ? match[1] : "text"}
+                                     PreTag="div"
+                                     className="rounded-lg my-2 !bg-gray-900 !p-3 !text-[13px] overflow-x-auto shadow-sm"
+                                   />
+                                 );
+                               }
+                               
+                               return (
+                                 <code {...props} className="bg-gray-100 px-1 py-0.5 rounded text-[13px] text-pink-600 font-mono border border-gray-200">
+                                   {children}
+                                 </code>
+                               );
+                             }
+                           }}
+                         >
+                           {msg.content}
+                         </ReactMarkdown>
+                       </div>
+                    )}
                   </div>
                   
                   {/* Action row: Reject/Approve if unsafe */}
@@ -539,7 +611,7 @@ export default function App() {
         <div className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setIsSettingsOpen(false)}>
           <div className="bg-white border border-gray-200 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-5" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center">
-              <h2 className="text-base font-bold text-gray-900 flex items-center"><ShieldAlert size={16} className="mr-2 text-gray-500"/> Agent Control</h2>
+              <h2 className="text-sm font-bold text-gray-900 flex items-center"><ShieldAlert size={16} className="mr-2 text-gray-500"/> Agent Control</h2>
               <button onClick={() => setIsSettingsOpen(false)} className="text-gray-400 hover:text-gray-700 p-1"><X size={18} /></button>
             </div>
             <p className="text-xs text-gray-500 leading-relaxed">Controls how the routing agent handles decisions. "Ask Everytime" pauses at Phase 2 and shows you the proposed route before executing.</p>

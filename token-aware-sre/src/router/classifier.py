@@ -18,7 +18,11 @@ class IncidentClassifier:
         self.model_name = model_name if model_name else Config.CLASSIFIER_MODEL
         self.logger.info(f"Loading local classification model: {self.model_name}")
         try:
-            self.classifier = pipeline("zero-shot-classification", model=self.model_name)
+            if self.model_name and self.model_name.lower() not in ("none", "disabled", "skip", ""):
+                self.classifier = pipeline("zero-shot-classification", model=self.model_name)
+            else:
+                self.classifier = None
+                self.logger.info("Classifier model bypassed/disabled. Using heuristic classification.")
         except Exception as e:
             self.logger.error(f"Failed to load classifier: {e}")
             self.classifier = None
@@ -34,8 +38,22 @@ class IncidentClassifier:
                   as well as the primary labels that matched.
         """
         if not payload or not self.classifier:
-            self.logger.warning("Classifier not loaded or payload empty. Returning defaults.")
-            return {"severity": 5, "complexity": 5}
+            self.logger.warning("Classifier not loaded or payload empty. Returning heuristic scores.")
+            p_lower = payload.lower() if payload else ""
+            sev = 8 if any(k in p_lower for k in ["fatal", "critical", "outage", "down", "panic", "emergency"]) else (
+                5 if any(k in p_lower for k in ["error", "fail", "timeout", "exception", "refused"]) else 3
+            )
+            comp = 8 if any(k in p_lower for k in ["across all", "cluster", "deadlock", "distributed", "corrupt"]) else (
+                5 if any(k in p_lower for k in ["database", "redis", "memory", "leak"]) else 3
+            )
+            sev_label = "critical system failure" if sev >= 8 else ("moderate degradation" if sev >= 5 else "low priority warning")
+            comp_label = "requires deep debugging across multiple services" if comp >= 8 else ("requires moderate investigation" if comp >= 5 else "simple known issue")
+            return {
+                "severity": sev,
+                "complexity": comp,
+                "primary_severity_label": sev_label,
+                "primary_complexity_label": comp_label
+            }
 
         severity_labels = [
             "critical system failure", 

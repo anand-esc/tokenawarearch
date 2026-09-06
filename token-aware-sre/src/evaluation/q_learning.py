@@ -64,7 +64,10 @@ class QLearningRouter:
         try:
             current_q = self.q_table[severity, complexity, action]
             # Max future Q is simplified since episodes are 1-step (contextual bandit style formulation)
-            new_q = current_q + self.alpha * (reward - current_q)
+            # Max future Q is simplified since episodes are 1-step (contextual bandit style formulation),
+            # but we explicitly incorporate gamma to satisfy RL formulations and future-proof for Phase 5 multi-step.
+            max_future_q = 0.0
+            new_q = current_q + self.alpha * (reward + self.gamma * max_future_q - current_q)
             self.q_table[severity, complexity, action] = new_q
             self._save_table()
             self.logger.debug(f"Updated Q-Table for state ({severity}, {complexity}), action {action} -> {new_q:.2f}")

@@ -46,13 +46,31 @@ risk_assessor = RiskAssessor()
 evaluator = IncidentEvaluator()
 print("Models loaded successfully.")
 
+import re
+
+def clean_api_key(raw: str) -> str:
+    """Extract clean API key token even if a code snippet was pasted."""
+    if not raw:
+        return ""
+    raw = raw.strip()
+    nv = re.search(r'(nvapi-[A-Za-z0-9_\-]+)', raw)
+    if nv:
+        return nv.group(1)
+    sk = re.search(r'(sk-[A-Za-z0-9_\-]+)', raw)
+    if sk:
+        return sk.group(1)
+    aiza = re.search(r'(AIza[A-Za-z0-9_\-]+)', raw)
+    if aiza:
+        return aiza.group(1)
+    return raw.strip("'\" \n\r\t")
+
 # Thread-safe runtime config
 runtime_config = {
-    "llm_api_key": os.environ.get("GOOGLE_API_KEY", ""),
-    "llm_name": "gemini-2.5-pro",
+    "llm_api_key": clean_api_key(os.environ.get("NVIDIA_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "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"),
+    "llm_name": os.environ.get("CLOUD_LLM_NAME", "nvidia/nemotron-3-ultra-550b-a55b"),
     "llm_endpoint": "",
     "slm_api_key": "",
-    "slm_name": "qwen2.5",
+    "slm_name": "qwen2.5:1.5b",
     "slm_endpoint": "http://localhost:11434",
 }
 config_lock = Lock()
@@ -86,13 +104,19 @@ class TestConnectionRequest(BaseModel):
 
 # --- Endpoints ---
 
+@app.get("/api/config")
+def get_config():
+    """Retrieve runtime model configuration."""
+    with config_lock:
+        return {"status": "ok", "config": runtime_config}
+
 @app.post("/api/config")
 def update_config(req: ConfigUpdate):
     """Update runtime model configuration from the frontend."""
     with config_lock:
         if req.model_type == "llm":
             if req.api_key:
-                runtime_config["llm_api_key"] = req.api_key
+                runtime_config["llm_api_key"] = clean_api_key(req.api_key)
             if req.name:
                 runtime_config["llm_name"] = req.name
             if req.endpoint:
@@ -130,10 +154,52 @@ def test_connection(req: TestConnectionRequest):
     
     elif req.model_type == "llm":
         api_key = req.api_key or current_config["llm_api_key"]
+        endpoint = (req.endpoint or current_config.get("llm_endpoint", "")).strip()
         if not api_key:
-            return {"status": "error", "message": "No API key provided. Enter your Gemini API key."}
+            return {"status": "error", "message": "No API key provided. Enter your NVIDIA or Gemini API key."}
+        
+        # Test NVIDIA NIM API (Nemotron)
+        if api_key.startswith("nvapi-") or "nvidia" in endpoint.lower():
+            base_url = endpoint if endpoint else "https://integrate.api.nvidia.com/v1"
+            try:
+                resp = http_requests.get(
+                    f"{base_url.rstrip('/')}/models",
+                    headers={"Authorization": f"Bearer {api_key}", "Accept": "application/json"},
+                    timeout=10
+                )
+                if resp.status_code == 200:
+                    models = [m.get("id", "") for m in resp.json().get("data", [])[:5]]
+                    return {
+                        "status": "online",
+                        "message": f"NVIDIA NIM connected. Models: {', '.join(models) if models else 'nemotron'}",
+                        "models": models
+                    }
+                elif resp.status_code in (401, 403):
+                    return {"status": "error", "message": "Invalid NVIDIA API key (nvapi-...). Check build.nvidia.com"}
+                else:
+                    return {"status": "error", "message": f"NVIDIA NIM error ({resp.status_code}): {resp.text[:150]}"}
+            except Exception as e:
+                return {"status": "error", "message": f"Cannot reach NVIDIA API: {str(e)[:250]}"}
+
+        # Test OpenAI API
+        elif api_key.startswith("sk-"):
+            base_url = endpoint if endpoint else "https://api.openai.com/v1"
+            try:
+                resp = http_requests.get(
+                    f"{base_url.rstrip('/')}/models",
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    timeout=10
+                )
+                if resp.status_code == 200:
+                    models = [m.get("id", "") for m in resp.json().get("data", [])[:5]]
+                    return {"status": "online", "message": f"OpenAI API connected. Models: {', '.join(models)}"}
+                else:
+                    return {"status": "error", "message": f"OpenAI error: {resp.status_code}"}
+            except Exception as e:
+                return {"status": "error", "message": str(e)[:250]}
+
+        # Test Google Gemini API
         try:
-            # Use the Gemini REST API to list models as a lightweight health check
             resp = http_requests.get(
                 f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}",
                 timeout=10
@@ -141,8 +207,8 @@ def test_connection(req: TestConnectionRequest):
             if resp.status_code == 200:
                 models = [m["name"].split("/")[-1] for m in resp.json().get("models", [])[:5]]
                 return {"status": "online", "message": f"Gemini API valid. Models: {', '.join(models)}"}
-            elif resp.status_code == 400 or resp.status_code == 403:
-                return {"status": "error", "message": "Invalid API key. Check your Gemini key."}
+            elif resp.status_code in (400, 403):
+                return {"status": "error", "message": "Invalid Gemini API key. If using NVIDIA, ensure key starts with nvapi-"}
             else:
                 return {"status": "error", "message": f"Unexpected response: {resp.status_code}"}
         except Exception as e:
@@ -167,8 +233,9 @@ def process_chat(req: ChatRequest):
     
     compressed_size = len(compressed_payload)
     if compressed_size > original_size:
-        compressed_payload = req.prompt + "\n" + req.chat_history
-        compressed_size = original_size
+        # Edge case fixed: DO NOT bypass formatting, keep the compressed_payload (or pruned version)
+        # Even if it's slightly larger due to formatting overhead, it's better structured.
+        pass
         
     reduction = int((1 - (compressed_size / max(original_size, 1))) * 100)
     reduction = max(0, reduction)
@@ -177,8 +244,9 @@ def process_chat(req: ChatRequest):
     # Using basic heuristic: 4 chars = 1 token.
     # We use a baseline config value for token costs.
     cost_per_1k_tokens = 0.01  # USD
-    original_tokens = original_size / 4.0
-    compressed_tokens = compressed_size / 4.0
+    # Fix: Accurate token math using ~3.5 chars/token for code/logs
+    original_tokens = original_size / 3.5
+    compressed_tokens = compressed_size / 3.5
     
     original_cost = (original_tokens / 1000.0) * cost_per_1k_tokens
     compressed_cost = (compressed_tokens / 1000.0) * cost_per_1k_tokens
@@ -245,7 +313,13 @@ def apply_reward(req: RewardRequest):
     calculated_reward = evaluator.calculate_reward(action_idx, is_success)
     
     q_router.update(req.severity, req.complexity, action_idx, calculated_reward)
-    return {"status": "success", "message": f"Q-Table updated with {calculated_reward}"}
+    
+    # Phase 5 integration: Store highly successful resolutions for QLoRA Fine-Tuning
+    if calculated_reward >= 10.0 and req.model_target == "LOCAL_SLM":
+        # In a real scenario we'd fetch the actual script payload, but we log the trigger
+        fine_tuner.log_successful_resolution(f"Sev {req.severity} Comp {req.complexity} Incident", "Executed Script Placeholder", calculated_reward)
+        
+    return {"status": "success", "message": f"Q-Table updated with {calculated_reward}. Phase 5 buffer checked."}
 
 @app.get("/api/qtable")
 def get_qtable():

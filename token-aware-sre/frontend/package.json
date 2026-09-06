@@ -10,12 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@rolldown/binding-linux-x64-gnu": "^1.2.7",
     "@tailwindcss/postcss": "^4.3.3",
     "autoprefixer": "^10.5.4",
     "lucide-react": "^1.39.0",
     "postcss": "^8.5.26",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^16.1.1",
+    "remark-gfm": "^4.0.1",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {

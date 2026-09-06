@@ -13,16 +13,22 @@ class ChatHistorySummarizer:
         logger (logging.Logger): Logger for the summarizer.
         summarizer (pipeline): HuggingFace summarization pipeline.
     """
-    def __init__(self, model_name="facebook/bart-large-cnn"):
+    def __init__(self, model_name=None):
+        import os
         self.logger = logging.getLogger(__name__)
-        self.logger.info(f"Loading local summarization model: {model_name}")
+        self.model_name = model_name if model_name is not None else os.getenv("SUMMARIZER_MODEL", "none")
+        self.logger.info(f"Loading local summarization model: {self.model_name}")
         
         # Hardware acceleration check (GPU vs CPU)
         device = 0 if torch.cuda.is_available() else -1
         
         try:
-            # Load the HuggingFace pipeline for summarization
-            self.summarizer = pipeline("summarization", model=model_name, device=device)
+            if self.model_name and self.model_name.lower() not in ("none", "disabled", "skip", ""):
+                # Load the HuggingFace pipeline for summarization
+                self.summarizer = pipeline("summarization", model=self.model_name, device=device)
+            else:
+                self.summarizer = None
+                self.logger.info("Summarizer model bypassed/disabled. Raw chat history will be used.")
         except Exception as e:
             self.logger.error(f"Failed to load summarizer model: {e}")
             self.summarizer = None

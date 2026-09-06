@@ -6,14 +6,14 @@ class Config:
     # ---------------------------------------------------------
     # Optimization Funnel (Phase 1)
     # ---------------------------------------------------------
-    COMPRESSOR_MODEL = os.getenv("COMPRESSOR_MODEL", "TinyLlama/TinyLlama-1.1B-Chat-v1.0")
+    COMPRESSOR_MODEL = os.getenv("COMPRESSOR_MODEL", "none")
     SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.85"))
     COMPRESSION_TARGET_TOKENS = int(os.getenv("COMPRESSION_TARGET_TOKENS", "500"))
     
     # ---------------------------------------------------------
     # Classifier & Router (Phase 2)
     # ---------------------------------------------------------
-    CLASSIFIER_MODEL = os.getenv("CLASSIFIER_MODEL", "cross-encoder/nli-distilroberta-base")
+    CLASSIFIER_MODEL = os.getenv("CLASSIFIER_MODEL", "none")
     MAX_API_BUDGET = float(os.getenv("MAX_API_BUDGET", "0.05"))  # Max USD per incident
     
     # ---------------------------------------------------------

@@ -24,7 +24,7 @@ class LogCompressor:
         self.logger.info("Initializing LLMLingua prompt compressor...")
         
         try:
-            if PromptCompressor:
+            if PromptCompressor and self.model_name and self.model_name.lower() not in ("none", "disabled", "skip", ""):
                 # We use TinyLlama for fast, local compression. It requires minimal VRAM.
                 self.compressor = PromptCompressor(
                     model_name=self.model_name,
@@ -32,7 +32,7 @@ class LogCompressor:
                 )
             else:
                 self.compressor = None
-                self.logger.warning("llmlingua not installed. Compressor will bypass.")
+                self.logger.info("LLMLingua prompt compressor bypassed or disabled.")
         except Exception as e:
             self.logger.error(f"Failed to load LLMLingua: {e}")
             self.compressor = None
