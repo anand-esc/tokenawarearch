@@ -1,115 +1,60 @@
 import logging
 from typing import Dict, Optional, Any
-from transformers import pipeline
+import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from config import Config
 
 class IncidentClassifier:
     """Evaluates incident payloads to score Severity and Complexity locally.
     
-    Uses zero-shot classification via a fast local model (`cross-encoder/nli-distilroberta-base`) 
-    to triage the incident without spending any external API budget.
-
-    Attributes:
-        logger (logging.Logger): Logger for the classifier.
-        classifier (pipeline): HuggingFace zero-shot classification pipeline.
+    Uses our fine-tuned DistilRoBERTa regression model to predict the optimal 
+    1-10 scores based on raw token patterns.
     """
-    def __init__(self, model_name: Optional[str] = None):
+    def __init__(self, model_path: str = "/home/andromeda/Desktop/roberta-sre-router-final"):
         self.logger = logging.getLogger(__name__)
-        self.model_name = model_name if model_name else Config.CLASSIFIER_MODEL
-        self.logger.info(f"Loading local classification model: {self.model_name}")
+        self.model_path = model_path
+        self.logger.info(f"Loading proprietary fine-tuned classifier from: {self.model_path}")
+        
         try:
-            if self.model_name and self.model_name.lower() not in ("none", "disabled", "skip", ""):
-                self.classifier = pipeline("zero-shot-classification", model=self.model_name)
-            else:
-                self.classifier = None
-                self.logger.info("Classifier model bypassed/disabled. Using heuristic classification.")
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+            self.model = AutoModelForSequenceClassification.from_pretrained(self.model_path)
+            self.model.eval() # Set to evaluation mode
         except Exception as e:
-            self.logger.error(f"Failed to load classifier: {e}")
-            self.classifier = None
+            self.logger.error(f"Failed to load fine-tuned model: {e}")
+            self.tokenizer = None
+            self.model = None
 
     def classify(self, payload: str) -> Dict[str, Any]:
-        """Classifies the compressed incident payload.
-
-        Args:
-            payload (str): The compressed incident text from Phase 1.
-
-        Returns:
-            dict: A dictionary containing integer scores (1-10) for 'severity' and 'complexity', 
-                  as well as the primary labels that matched.
-        """
-        if not payload or not self.classifier:
-            self.logger.warning("Classifier not loaded or payload empty. Returning heuristic scores.")
-            p_lower = payload.lower() if payload else ""
-            sev = 8 if any(k in p_lower for k in ["fatal", "critical", "outage", "down", "panic", "emergency"]) else (
-                5 if any(k in p_lower for k in ["error", "fail", "timeout", "exception", "refused"]) else 3
-            )
-            comp = 8 if any(k in p_lower for k in ["across all", "cluster", "deadlock", "distributed", "corrupt"]) else (
-                5 if any(k in p_lower for k in ["database", "redis", "memory", "leak"]) else 3
-            )
-            sev_label = "critical system failure" if sev >= 8 else ("moderate degradation" if sev >= 5 else "low priority warning")
-            comp_label = "requires deep debugging across multiple services" if comp >= 8 else ("requires moderate investigation" if comp >= 5 else "simple known issue")
-            return {
-                "severity": sev,
-                "complexity": comp,
-                "primary_severity_label": sev_label,
-                "primary_complexity_label": comp_label
-            }
-
-        severity_labels = [
-            "critical system failure", 
-            "high impact outage", 
-            "moderate degradation", 
-            "low priority warning", 
-            "informational"
-        ]
-        
-        complexity_labels = [
-            "requires deep debugging across multiple services", 
-            "requires moderate investigation", 
-            "simple known issue", 
-            "trivial fix"
-        ]
+        """Classifies the incident payload to predict Severity and Complexity."""
+        if not payload or not self.model or not self.tokenizer:
+            self.logger.warning("Classifier not loaded or payload empty. Falling back to heuristic.")
+            return {"severity": 5, "complexity": 5}
 
         try:
-            sev_result = self.classifier(payload, severity_labels)
-            comp_result = self.classifier(payload, complexity_labels)
-
-            severity_score = self._map_to_score(sev_result['labels'][0], "severity")
-            complexity_score = self._map_to_score(comp_result['labels'][0], "complexity")
+            # Tokenize input
+            inputs = self.tokenizer(payload, return_tensors="pt", truncation=True, padding=True, max_length=512)
+            
+            # Predict
+            with torch.no_grad():
+                outputs = self.model(**inputs)
+            
+            # Extract the two regression logits [Severity, Complexity]
+            predictions = outputs.logits.squeeze().tolist()
+            
+            # Ensure predictions are bounds-checked between 1 and 10
+            severity = max(1, min(10, int(round(predictions[0]))))
+            complexity = max(1, min(10, int(round(predictions[1]))))
 
             return {
-                "severity": severity_score,
-                "complexity": complexity_score,
-                "primary_severity_label": sev_result['labels'][0],
-                "primary_complexity_label": comp_result['labels'][0]
+                "severity": severity,
+                "complexity": complexity
             }
 
         except Exception as e:
             self.logger.error(f"Classification failed during inference: {e}")
             return {"severity": 5, "complexity": 5}
 
-    def _map_to_score(self, label: str, category: str) -> int:
-        """Maps a textual classification label to a numerical score (1-10)."""
-        if category == "severity":
-            mapping = {
-                "critical system failure": 10,
-                "high impact outage": 8,
-                "moderate degradation": 5,
-                "low priority warning": 3,
-                "informational": 1
-            }
-            return mapping.get(label, 5)
-        elif category == "complexity":
-            mapping = {
-                "requires deep debugging across multiple services": 10,
-                "requires moderate investigation": 7,
-                "simple known issue": 4,
-                "trivial fix": 2
-            }
-            return mapping.get(label, 5)
-        return 5
-
 if __name__ == "__main__":
     classifier = IncidentClassifier()
-    sample = "Database connection timeout across all production web servers."
+    sample = "@@@ Node worker-pool-3 transitioned to NotReady. Kubelet logs show 'PLEG is not healthy' @@@"
     print(classifier.classify(sample))

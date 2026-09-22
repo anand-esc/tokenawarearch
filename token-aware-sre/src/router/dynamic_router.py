@@ -8,12 +8,13 @@ class GlobalDynamicRouter:
     
     Evaluates the highly compressed incident payload, queries the Classifier 
     and Budgeter, and makes the definitive decision on whether to route the 
-    remediation task to a free Local SLM or a paid Cloud LLM.
+    remediation task to a Local SLM, Cloud LLM, or Hybrid Orchestrator.
 
     Attributes:
         logger (logging.Logger): Logger for the router.
         classifier (IncidentClassifier): Component to score severity and complexity.
         budgeter (TokenBudgeter): Component to allocate a token budget.
+        q_router (QLearningRouter): Tabular RL agent for cost/token optimization.
     """
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -27,18 +28,11 @@ class GlobalDynamicRouter:
             raise RuntimeError("Router initialization failed") from e
 
     def route_incident(self, compressed_payload: str) -> dict:
-        """Determines the optimal execution model (Local SLM vs Cloud LLM).
-
-        Args:
-            compressed_payload (str): The optimized incident text from Phase 1.
-
-        Returns:
-            dict: The routing decision including the target model and reasoning.
-        """
+        """Determines the optimal execution model (Local SLM vs Cloud LLM vs Hybrid)."""
         self.logger.info("Evaluating incoming incident payload for routing.")
 
         try:
-            # 1. Classify Severity and Complexity
+            # 1. Classify Severity and Complexity using our fine-tuned RoBERTa model
             classification = self.classifier.classify(compressed_payload)
             severity = classification.get("severity", 5)
             complexity = classification.get("complexity", 5)
@@ -51,9 +45,13 @@ class GlobalDynamicRouter:
                 model_target = "LOCAL_SLM"
                 reason = "Budget restricted to $0.00 due to low severity."
             else:
-                # Query the RL Brain!
+                # Query the RL Brain! (0 = SLM, 1 = LLM, 2 = Hybrid)
                 action = self.q_router.choose_action(severity, complexity)
-                if action == 1 and budget.get("max_spend_usd", 0) > 0.0:
+                
+                if action == 2:
+                    model_target = "HYBRID_ORCHESTRATOR"
+                    reason = "Q-Learning Brain chose Hybrid (0-Token Breakdown) for max efficiency."
+                elif action == 1 and budget.get("max_spend_usd", 0) > 0.0:
                     model_target = "CLOUD_LLM"
                     reason = "Q-Learning Brain chose Cloud LLM. Budget is available."
                 else:
@@ -66,9 +64,7 @@ class GlobalDynamicRouter:
                 "severity": severity,
                 "complexity": complexity,
                 "budget_usd": budget.get("max_spend_usd", 0.0),
-                "token_limit": budget.get("max_tokens", 0),
-                "primary_severity_label": classification.get("primary_severity_label"),
-                "primary_complexity_label": classification.get("primary_complexity_label")
+                "token_limit": budget.get("max_tokens", 0)
             }
 
             self.logger.info(f"Routing Decision: {model_target} - {reason}")
