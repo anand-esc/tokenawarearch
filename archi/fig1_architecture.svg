@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1150" height="650" viewBox="0 0 1150 650">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#222"/></marker></defs>
+<rect width="1150" height="650" fill="#fff"/>
+<text x="110.0" y="24" font-family="'Times New Roman','Liberation Serif',serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">Phase 1: Input Optimization</text>
+<path d="M20,33 L200,33" fill="none" stroke="#222" stroke-width="1.5"/>
+<text x="340.0" y="24" font-family="'Times New Roman','Liberation Serif',serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">Phase 2: Triage &amp; Routing</text>
+<path d="M240,33 L440,33" fill="none" stroke="#222" stroke-width="1.5"/>
+<text x="565.0" y="24" font-family="'Times New Roman','Liberation Serif',serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">Phase 3: Agent Execution</text>
+<path d="M470,33 L660,33" fill="none" stroke="#222" stroke-width="1.5"/>
+<text x="915.0" y="24" font-family="'Times New Roman','Liberation Serif',serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">Phase 4: Safety Gatekeeper</text>
+<path d="M700,33 L1130,33" fill="none" stroke="#222" stroke-width="1.5"/>
+<rect x="30" y="52" width="160" height="50" rx="25" fill="#8DC63F" stroke="#333" stroke-width="1.2"/>
+<text x="110" y="74.3" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Incident Alert</text>
+<text x="110" y="90.9" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#111">(webhook / logs / chat)</text>
+<path d="M110,102 L110,132" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="30" y="132" width="160" height="52" rx="0" fill="#9ACD5A" stroke="#333" stroke-width="1.2"/>
+<text x="110.0" y="163.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Log Rewriting</text>
+<path d="M110,184 L110,212" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="30" y="212" width="160" height="52" rx="0" fill="#9ACD5A" stroke="#333" stroke-width="1.2"/>
+<text x="110.0" y="233.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Chat History</text>
+<text x="110.0" y="253.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Summarization</text>
+<path d="M110,264 L110,292" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="30" y="292" width="160" height="52" rx="0" fill="#9ACD5A" stroke="#333" stroke-width="1.2"/>
+<text x="110.0" y="315.3" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Semantic Pruning</text>
+<text x="110.0" y="331.9" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#111">(cos ≥ 0.85)</text>
+<path d="M110,344 L110,372" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="30" y="372" width="160" height="52" rx="0" fill="#9ACD5A" stroke="#333" stroke-width="1.2"/>
+<text x="110.0" y="393.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">LLMLingua</text>
+<text x="110.0" y="413.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Compression</text>
+<text x="110" y="448" font-family="'Times New Roman','Liberation Serif',serif" font-size="14" text-anchor="middle" font-weight="normal" font-style="italic" fill="#222">63.62% fewer tokens</text>
+<path d="M190,398 L215,398 L215,82 L250,82" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="250" y="56" width="180" height="52" rx="0" fill="#29ABE2" stroke="#333" stroke-width="1.2"/>
+<text x="340.0" y="77.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">DistilRoBERTa</text>
+<text x="340.0" y="97.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Classifier</text>
+<path d="M340,108 L340,140" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="348" y="128" font-family="'Times New Roman','Liberation Serif',serif" font-size="12" text-anchor="middle" font-weight="normal" fill="#222"></text>
+<rect x="250" y="140" width="180" height="56" rx="0" fill="#29ABE2" stroke="#333" stroke-width="1.2"/>
+<text x="340.0" y="165.3" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Token Budgeter</text>
+<text x="340.0" y="181.9" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#111">severity → max spend ≤ $0.05</text>
+<text x="346" y="130" font-family="'Times New Roman','Liberation Serif',serif" font-size="12" text-anchor="middle" font-weight="normal" fill="#222"></text>
+<text x="346" y="127" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" fill="#222">s, c</text>
+<path d="M340,196 L340,240" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<polygon points="340,240 432,305 340,370 248,305" fill="#F7941D" stroke="#333" stroke-width="1.2"/>
+<text x="340" y="292.3" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Q-Learning</text>
+<text x="340" y="312.4" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Router</text>
+<text x="340" y="328.9" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#111">argmax Q(s, a)</text>
+<path d="M432,305 L455,305" fill="none" stroke="#222" stroke-width="1.5"/>
+<path d="M455,226 L455,384" fill="none" stroke="#222" stroke-width="1.5"/>
+<path d="M455,226 L480,226" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="480" y="200" width="170" height="52" rx="0" fill="#29ABE2" stroke="#333" stroke-width="1.2"/>
+<text x="565.0" y="223.3" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Cloud LLM</text>
+<text x="565.0" y="239.9" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#111">complex incidents</text>
+<text x="451" y="220" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" text-anchor="end" font-weight="normal" font-style="italic" fill="#222">a = 1</text>
+<path d="M455,305 L480,305" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="480" y="279" width="170" height="52" rx="0" fill="#F9C74F" stroke="#333" stroke-width="1.2"/>
+<text x="565.0" y="302.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#111">Hybrid Orchestrator</text>
+<text x="565.0" y="318.3" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#111">only ~50 tokens to cloud</text>
+<text x="451" y="323" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" text-anchor="end" font-weight="normal" font-style="italic" fill="#222">a = 2</text>
+<path d="M455,384 L480,384" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="480" y="358" width="170" height="52" rx="0" fill="#29ABE2" stroke="#333" stroke-width="1.2"/>
+<text x="565.0" y="381.3" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Local SLM</text>
+<text x="565.0" y="397.9" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#111">Qwen2.5-1.5B, $0 cost</text>
+<text x="451" y="378" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" text-anchor="end" font-weight="normal" font-style="italic" fill="#222">a = 0</text>
+<path d="M650,226 L675,226" fill="none" stroke="#222" stroke-width="1.5"/>
+<path d="M650,305 L675,305" fill="none" stroke="#222" stroke-width="1.5"/>
+<path d="M650,384 L675,384" fill="none" stroke="#222" stroke-width="1.5"/>
+<path d="M675,384 L675,82" fill="none" stroke="#222" stroke-width="1.5"/>
+<path d="M675,82 L710,82" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="710" y="56" width="200" height="52" rx="0" fill="#C8C8C8" stroke="#333" stroke-width="1.2"/>
+<text x="810.0" y="77.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Stage 1: AST</text>
+<text x="810.0" y="97.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Canonicalization</text>
+<path d="M810,108 L810,140" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="710" y="140" width="200" height="56" rx="0" fill="#C8C8C8" stroke="#333" stroke-width="1.2"/>
+<text x="810.0" y="163.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Stage 2: Semantic</text>
+<text x="810.0" y="183.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Policy Validation</text>
+<path d="M810,196 L810,232" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<polygon points="810,232 905,290 810,348 715,290" fill="#F7941D" stroke="#333" stroke-width="1.2"/>
+<text x="810" y="285.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Risk Score</text>
+<text x="810" y="305.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">R &lt; 30 ?</text>
+<path d="M905,290 L960,290" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="930" y="282" font-family="'Times New Roman','Liberation Serif',serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">No</text>
+<rect x="960" y="258" width="160" height="64" rx="0" fill="#F04E4E" stroke="#333" stroke-width="1.2"/>
+<text x="1040.0" y="277.3" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Escalate to</text>
+<text x="1040.0" y="297.4" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">SRE On-Call</text>
+<text x="1040.0" y="313.9" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#111">(human-in-the-loop)</text>
+<path d="M810,348 L810,388" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="818" y="372" font-family="'Times New Roman','Liberation Serif',serif" font-size="15" text-anchor="start" font-weight="bold" fill="#222">Yes</text>
+<polygon points="723,388 915,388 897,444 705,444" fill="#F9C74F" stroke="#333" stroke-width="1.2"/>
+<text x="810.0" y="411.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Execute Script</text>
+<text x="810.0" y="431.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">in Cluster</text>
+<rect x="20" y="482" width="1110" height="150" fill="none" stroke="#666" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="30" y="503" font-family="'Times New Roman','Liberation Serif',serif" font-size="15" text-anchor="start" font-weight="bold" fill="#222">Phase 5: Continuous Learning</text>
+<rect x="710" y="516" width="200" height="56" rx="0" fill="#8DC63F" stroke="#333" stroke-width="1.2"/>
+<text x="810.0" y="541.3" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Reward Signal r</text>
+<text x="810.0" y="557.9" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#111">{+10, +8, +4, −5, −10}</text>
+<path d="M810,444 L810,516" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="480" y="516" width="170" height="56" rx="0" fill="#8DC63F" stroke="#333" stroke-width="1.2"/>
+<text x="565.0" y="539.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">QLoRA Fine-</text>
+<text x="565.0" y="559.0" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Tuning of SLM</text>
+<rect x="250" y="516" width="180" height="56" rx="0" fill="#8DC63F" stroke="#333" stroke-width="1.2"/>
+<text x="340.0" y="541.3" font-family="'Times New Roman','Liberation Serif',serif" font-size="17" font-weight="bold" text-anchor="middle" fill="#111">Q-Table Update</text>
+<text x="340.0" y="557.9" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#111">Eq. (1)</text>
+<path d="M810,572 L810,605 L340,605" fill="none" stroke="#222" stroke-width="1.5"/>
+<path d="M565,605 L565,572" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M340,605 L340,572" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M340,516 L340,370" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M565,516 L565,410" fill="none" stroke="#222" stroke-width="1.5" marker-end="url(#ah)"/>
+<text x="346" y="470" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" text-anchor="start" font-weight="normal" font-style="italic" fill="#222">update policy</text>
+<text x="571" y="470" font-family="'Times New Roman','Liberation Serif',serif" font-size="13" text-anchor="start" font-weight="normal" font-style="italic" fill="#222">adapt SLM</text>
+</svg>

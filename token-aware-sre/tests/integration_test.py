@@ -3,8 +3,13 @@ import sys
 import logging
 import time
 
-# Add src to python path
+# Offline resilience for testing in sandboxed/offline environments
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
+# Add src and token-aware-sre root to python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from config import Config
 from optimization.pipeline import OptimizationFunnel

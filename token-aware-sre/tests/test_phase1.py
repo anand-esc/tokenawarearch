@@ -1,6 +1,10 @@
 import sys
 import os
 
+# Ensure offline deterministic execution in sandboxed / offline environments
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
 # Ensure src is in the python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 

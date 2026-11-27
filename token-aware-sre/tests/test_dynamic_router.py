@@ -1,4 +1,7 @@
-import pytest
+try:
+    import pytest
+except ImportError:
+    pytest = None
 from unittest.mock import patch
 from src.router.dynamic_router import GlobalDynamicRouter
 

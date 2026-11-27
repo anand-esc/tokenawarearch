@@ -1,0 +1,89 @@
+{
+  "tier1_total": 187,
+  "base_model": {
+    "successes": 157,
+    "rate_pct": 83.96
+  },
+  "qlora_model": {
+    "successes": 179,
+    "rate_pct": 95.72
+  },
+  "delta_gain_pct": 11.76,
+  "statistical_test": {
+    "test_name": "McNemar's test with continuity correction (paired binary outcomes)",
+    "contingency_table": {
+      "both_succeed (a)": 156,
+      "base_succeed_qlora_fail (b)": 1,
+      "base_fail_qlora_succeed (c)": 23,
+      "both_fail (d)": 7,
+      "total (N)": 187
+    },
+    "chi2_statistic": 18.375,
+    "degrees_of_freedom": 1,
+    "p_value": 1.8e-05,
+    "significance": "p < 0.001 (statistically significant)",
+    "two_sided_exact_binomial_p": 2.98e-06
+  },
+  "sample_traces": [
+    {
+      "incident_id": 1,
+      "title": "Pod worker-9 in namespace prod-orders terminated with OOMKilled (Exit Code 137)",
+      "base_success": true,
+      "qlora_success": true
+    },
+    {
+      "incident_id": 2,
+      "title": "Service worker-22 failing readiness probe: stale pid lock file /var/run/analytics.pid exists",
+      "base_success": true,
+      "qlora_success": true
+    },
+    {
+      "incident_id": 3,
+      "title": "Pod worker-2 in namespace prod-payment terminated with OOMKilled (Exit Code 137)",
+      "base_success": true,
+      "qlora_success": true
+    },
+    {
+      "incident_id": 4,
+      "title": "Pod worker-17 in namespace analytics terminated with OOMKilled (Exit Code 137)",
+      "base_success": true,
+      "qlora_success": true
+    },
+    {
+      "incident_id": 5,
+      "title": "Pod worker-23 in namespace analytics terminated with OOMKilled (Exit Code 137)",
+      "base_success": true,
+      "qlora_success": true
+    },
+    {
+      "incident_id": 6,
+      "title": "Redis instance worker-19 memory fragmentation ratio > 2.8, OOM command rejected",
+      "base_success": true,
+      "qlora_success": true
+    },
+    {
+      "incident_id": 7,
+      "title": "Pod worker-14 in namespace auth-service terminated with OOMKilled (Exit Code 137)",
+      "base_success": true,
+      "qlora_success": true
+    },
+    {
+      "incident_id": 8,
+      "title": "Node worker-11 /var/log volume usage at 94% threshold",
+      "base_success": true,
+      "qlora_success": true
+    },
+    {
+      "incident_id": 9,
+      "title": "Pod worker-12 in namespace auth-service terminated with OOMKilled (Exit Code 137)",
+      "base_success": true,
+      "qlora_success": true
+    },
+    {
+      "incident_id": 10,
+      "title": "Nginx Ingress controller dropped connections: 768 worker_connections are not enough",
+      "base_success": true,
+      "qlora_success": true
+    }
+  ]
+}

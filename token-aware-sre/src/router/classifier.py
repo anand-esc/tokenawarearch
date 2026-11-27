@@ -1,3 +1,4 @@
+import os
 import logging
 from typing import Dict, Optional, Any
 import torch
@@ -10,19 +11,24 @@ class IncidentClassifier:
     Uses our fine-tuned DistilRoBERTa regression model to predict the optimal 
     1-10 scores based on raw token patterns.
     """
-    def __init__(self, model_path: str = "/home/andromeda/Desktop/roberta-sre-router-final"):
+    def __init__(self, model_path: Optional[str] = None):
         self.logger = logging.getLogger(__name__)
-        self.model_path = model_path
-        self.logger.info(f"Loading proprietary fine-tuned classifier from: {self.model_path}")
-        
-        try:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-            self.model = AutoModelForSequenceClassification.from_pretrained(self.model_path)
-            self.model.eval() # Set to evaluation mode
-        except Exception as e:
-            self.logger.error(f"Failed to load fine-tuned model: {e}")
-            self.tokenizer = None
-            self.model = None
+        self.model_path = model_path or (Config.CLASSIFIER_MODEL if Config.CLASSIFIER_MODEL != "none" else None)
+        self.tokenizer = None
+        self.model = None
+
+        if self.model_path and self.model_path.lower() != "none":
+            self.logger.info(f"Loading proprietary fine-tuned classifier from: {self.model_path}")
+            try:
+                self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+                self.model = AutoModelForSequenceClassification.from_pretrained(self.model_path)
+                self.model.eval() # Set to evaluation mode
+            except Exception as e:
+                self.logger.error(f"Failed to load fine-tuned model: {e}")
+                self.tokenizer = None
+                self.model = None
+        else:
+            self.logger.info("No local fine-tuned model path provided; using zero-shot/heuristic fallback.")
 
     def classify(self, payload: str) -> Dict[str, Any]:
         """Classifies the incident payload to predict Severity and Complexity."""

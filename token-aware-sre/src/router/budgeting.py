@@ -34,15 +34,15 @@ class TokenBudgeter:
             self.logger.error("Invalid severity score provided. Defaulting to 5.")
             severity = 5
         
-        # Budget logic curve
+        # Budget logic curve bounded by $0.05 max per incident
         if severity <= 3:
             max_spend_usd = 0.0
         elif severity <= 6:
-            max_spend_usd = (severity - 3) * 0.5
+            max_spend_usd = (severity - 3) * 0.01
         elif severity <= 8:
-            max_spend_usd = (severity - 6) * 2.5 + 1.5
+            max_spend_usd = (severity - 6) * 0.005 + 0.03
         else:
-            max_spend_usd = (severity - 8) * 5.0 + 6.5
+            max_spend_usd = (severity - 8) * 0.005 + 0.04
             
         max_spend_usd = min(max_spend_usd, self.max_api_budget)
 
@@ -50,10 +50,10 @@ class TokenBudgeter:
         if max_spend_usd == 0.0:
             token_limit = 0
         else:
-            token_limit = int((max_spend_usd / self.cost_per_1k_tokens) * 1000)
+            token_limit = int(round((max_spend_usd / self.cost_per_1k_tokens) * 1000))
 
         budget_config = {
-            "max_spend_usd": round(max_spend_usd, 2),
+            "max_spend_usd": round(max_spend_usd, 3),
             "max_tokens": token_limit,
             "requires_local_only": max_spend_usd == 0.0
         }

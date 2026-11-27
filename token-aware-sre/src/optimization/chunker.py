@@ -1,4 +1,24 @@
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+try:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+except ImportError:
+    class RecursiveCharacterTextSplitter:
+        """Fallback character text splitter when langchain is unavailable."""
+        def __init__(self, chunk_size=1000, chunk_overlap=150, length_function=len, is_separator_regex=False):
+            self.chunk_size = chunk_size
+            self.chunk_overlap = chunk_overlap
+
+        def split_text(self, text: str) -> list:
+            if not text:
+                return []
+            chunks = []
+            start = 0
+            while start < len(text):
+                end = min(start + self.chunk_size, len(text))
+                chunks.append(text[start:end])
+                if end == len(text):
+                    break
+                start += max(1, self.chunk_size - self.chunk_overlap)
+            return chunks
 import logging
 
 class LogChunker:

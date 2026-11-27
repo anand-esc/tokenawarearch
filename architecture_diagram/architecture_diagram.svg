@@ -1,0 +1,367 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 950" width="1600" height="950" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <!-- Soft, elegant light gradients -->
+    <linearGradient id="canvas-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+
+    <!-- Phase 1 Soft Blue Gradient -->
+    <linearGradient id="bg-p1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f0f9ff"/>
+    </linearGradient>
+
+    <!-- Phase 2 Soft Blue Gradient -->
+    <linearGradient id="bg-p2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#eff6ff"/>
+    </linearGradient>
+
+    <!-- Phase 3 Clean Slate Gradient -->
+    <linearGradient id="bg-p3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f8fafc"/>
+    </linearGradient>
+
+    <!-- Phase 4 Soft Warm Amber Gradient -->
+    <linearGradient id="bg-p4" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#fffbeb"/>
+    </linearGradient>
+
+    <!-- Phase 5 Soft Periwinkle/Lavender Gradient -->
+    <linearGradient id="bg-p5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f8faff"/>
+      <stop offset="100%" stop-color="#f5f3ff"/>
+    </linearGradient>
+
+    <!-- Refined Arrow Markers -->
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#0284c7"/>
+    </marker>
+    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#d97706"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#dc2626"/>
+    </marker>
+
+    <!-- Card Subtle Drop Shadow -->
+    <filter id="card-shadow" x="-3%" y="-3%" width="106%" height="108%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.04"/>
+    </filter>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1600" height="950" fill="url(#canvas-bg)"/>
+  <rect x="15" y="15" width="1570" height="920" rx="14" fill="none" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- ==================== HEADER BANNER ==================== -->
+  <g transform="translate(45, 30)">
+    <rect x="0" y="0" width="1510" height="62" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" filter="url(#card-shadow)"/>
+    <rect x="16" y="13" width="6" height="36" rx="3" fill="#0284c7"/>
+    <text x="36" y="36" font-size="20" font-weight="700" fill="#0f172a" letter-spacing="-0.3">Token-Aware Multi-Agent Architecture for Autonomous SRE</text>
+    <text x="36" y="53" font-size="12" font-weight="500" fill="#64748b">Five-phase closed-loop operational pipeline: ingestion, intelligent routing, execution, safety gating, and continuous learning</text>
+    <rect x="1335" y="16" width="155" height="30" rx="6" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1"/>
+    <text x="1412" y="36" font-size="11.5" font-weight="700" fill="#0284c7" text-anchor="middle">500-Incident Benchmark</text>
+  </g>
+
+  <!-- ==================== PHASE 1: OPTIMIZATION ==================== -->
+  <g transform="translate(45, 108)">
+    <!-- Outer Card -->
+    <rect width="235" height="585" rx="12" fill="url(#bg-p1)" stroke="#cbd5e1" stroke-width="1.5"/>
+    
+    <!-- Header Badge -->
+    <rect x="14" y="14" width="207" height="34" rx="7" fill="#e0f2fe" stroke="#bae6fd" stroke-width="1"/>
+    <text x="117" y="36" font-size="12" font-weight="700" fill="#0369a1" text-anchor="middle" letter-spacing="0.5">PHASE 1: OPTIMIZATION</text>
+
+    <!-- Box 1: Raw Telemetry -->
+    <rect x="14" y="62" width="207" height="112" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" filter="url(#card-shadow)"/>
+    <text x="26" y="85" font-size="12" font-weight="700" fill="#1e293b">Raw SRE Telemetry</text>
+    <text x="26" y="105" font-size="11" fill="#64748b">• Prometheus Webhooks</text>
+    <text x="26" y="123" font-size="11" fill="#64748b">• Kubernetes Stack Traces</text>
+    <rect x="24" y="136" width="187" height="24" rx="4" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="117" y="152" font-size="10.5" font-weight="600" fill="#475569" text-anchor="middle">44,569 Raw Tokens (N=500)</text>
+
+    <!-- Arrow 1 -> 2 -->
+    <path d="M 117 174 L 117 198" stroke="#0284c7" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+    <!-- Box 2: Context Funnel -->
+    <rect x="14" y="200" width="207" height="138" rx="8" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <text x="26" y="223" font-size="12" font-weight="700" fill="#0369a1">Context Funnel</text>
+    <text x="26" y="244" font-size="11" fill="#334155">1. Semantic Deduplication</text>
+    <text x="26" y="262" font-size="11" fill="#334155">2. Cosine Chunk Pruning</text>
+    <text x="26" y="280" font-size="11" fill="#334155">3. LLMLingua Compression</text>
+    <rect x="24" y="296" width="187" height="26" rx="4" fill="#e0f2fe" stroke="#bae6fd" stroke-width="1"/>
+    <text x="117" y="313" font-size="11" font-weight="700" fill="#0369a1" text-anchor="middle">63.62% Context Reduction</text>
+
+    <!-- Arrow 2 -> 3 -->
+    <path d="M 117 338 L 117 362" stroke="#0284c7" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+    <!-- Box 3: Optimized Context -->
+    <rect x="14" y="364" width="207" height="112" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" filter="url(#card-shadow)"/>
+    <text x="26" y="387" font-size="12" font-weight="700" fill="#1e293b">Optimized Context</text>
+    <text x="26" y="407" font-size="11" fill="#64748b">• Key Diagnostic Entities</text>
+    <text x="26" y="425" font-size="11" fill="#64748b">• Standard JSON Schema</text>
+    <rect x="24" y="438" width="187" height="24" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+    <text x="117" y="454" font-size="10.5" font-weight="600" fill="#166534" text-anchor="middle">16,213 Clean Tokens</text>
+
+    <!-- Metric Callout -->
+    <rect x="14" y="496" width="207" height="72" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="117" y="520" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">Funnel Latency: &lt; 85 ms</text>
+    <text x="117" y="540" font-size="11" font-weight="700" fill="#166534" text-anchor="middle">API Spend: $0.00 (Zero Cost)</text>
+  </g>
+
+  <!-- Connector P1 -> P2 -->
+  <path d="M 280 420 L 306 420" stroke="#0284c7" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+
+  <!-- ==================== PHASE 2: ROUTING ==================== -->
+  <g transform="translate(312, 108)">
+    <!-- Outer Card -->
+    <rect width="265" height="585" rx="12" fill="url(#bg-p2)" stroke="#bfdbfe" stroke-width="1.5"/>
+    
+    <!-- Header Badge -->
+    <rect x="14" y="14" width="237" height="34" rx="7" fill="#dbeafe" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="132" y="36" font-size="12" font-weight="700" fill="#1d4ed8" text-anchor="middle" letter-spacing="0.5">PHASE 2: INTELLIGENT ROUTING</text>
+
+    <!-- Component 1: Classifier -->
+    <rect x="14" y="62" width="237" height="112" rx="8" fill="#ffffff" stroke="#93c5fd" stroke-width="1" filter="url(#card-shadow)"/>
+    <text x="26" y="85" font-size="12" font-weight="700" fill="#1e40af">DistilRoBERTa Classifier (124M)</text>
+    <text x="26" y="103" font-size="11" fill="#475569">State Space: S = 10 × 10 = 100 States</text>
+    <rect x="24" y="112" width="102" height="24" rx="4" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="75" y="128" font-size="10.5" font-weight="700" fill="#1d4ed8" text-anchor="middle">Sev s ∈ [1, 10]</text>
+    <rect x="133" y="112" width="106" height="24" rx="4" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="186" y="128" font-size="10.5" font-weight="700" fill="#1d4ed8" text-anchor="middle">Comp c ∈ [1, 10]</text>
+    <text x="26" y="157" font-size="10.5" fill="#64748b">Inference: &lt; 50 ms | Zero API Spend</text>
+
+    <!-- Arrow 1 -> 2 -->
+    <path d="M 132 174 L 132 198" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-indigo)"/>
+
+    <!-- Component 2: Dynamic Budgeter -->
+    <rect x="14" y="200" width="237" height="138" rx="8" fill="#ffffff" stroke="#93c5fd" stroke-width="1" filter="url(#card-shadow)"/>
+    <text x="26" y="223" font-size="12" font-weight="700" fill="#1e40af">Deterministic Token Budgeter</text>
+    <text x="26" y="243" font-size="11" fill="#475569">Piecewise Linear Severity Bounds:</text>
+    <text x="26" y="261" font-size="10.5" fill="#64748b">• Sev 1–3: $0.00 (Forced Local SLM)</text>
+    <text x="26" y="277" font-size="10.5" fill="#64748b">• Sev 4–6: $0.01 – $0.03 Cap (3k–4k tok)</text>
+    <text x="26" y="293" font-size="10.5" fill="#64748b">• Sev 7–10: Up to $0.05 Max Cap (5k tok)</text>
+    <rect x="24" y="303" width="217" height="22" rx="4" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="132" y="318" font-size="10.5" font-weight="700" fill="#1d4ed8" text-anchor="middle">Hard Guardrail: Max Spend ≤ $0.05</text>
+
+    <!-- Arrow 2 -> 3 -->
+    <path d="M 132 338 L 132 362" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-indigo)"/>
+
+    <!-- Component 3: Tabular Q-Router -->
+    <rect x="14" y="364" width="237" height="198" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <text x="26" y="387" font-size="12" font-weight="700" fill="#1e3a8a">Tabular Q-Learning Router</text>
+    <text x="26" y="406" font-size="11" fill="#475569">300 Cells (|S| × |A| = 100 × 3 Actions)</text>
+    <text x="26" y="424" font-size="10.5" fill="#64748b">• Direct 1-based (11, 11, 3) tensor</text>
+    <text x="26" y="440" font-size="10.5" fill="#64748b">• 300 Pre-warmed offline transitions</text>
+    <text x="26" y="456" font-size="10.5" fill="#64748b">• Pure greedy evaluation (ε = 0.00)</text>
+    <rect x="24" y="468" width="217" height="26" rx="4" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+    <text x="132" y="485" font-size="11" font-weight="700" fill="#1e40af" text-anchor="middle">Action a* = argmax Q(s, a)</text>
+    <rect x="24" y="502" width="217" height="24" rx="4" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+    <text x="132" y="518" font-size="10.5" font-weight="600" fill="#1d4ed8" text-anchor="middle">Routing Latency: &lt; 12 ms In-Process</text>
+  </g>
+
+  <!-- Connectors P2 -> P3 (Branching) -->
+  <path d="M 577 440 C 600 440, 600 225, 624 225" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrow-green)"/>
+  <path d="M 577 482 L 624 482" stroke="#0284c7" stroke-width="2.5" fill="none" marker-end="url(#arrow-blue)"/>
+  <path d="M 577 510 C 600 510, 600 595, 624 595" stroke="#7c3aed" stroke-width="2.5" fill="none" marker-end="url(#arrow-purple)"/>
+
+  <!-- ==================== PHASE 3: MULTI-AGENT EXECUTION ==================== -->
+  <g transform="translate(630, 108)">
+    <!-- Outer Card -->
+    <rect width="335" height="585" rx="12" fill="url(#bg-p3)" stroke="#cbd5e1" stroke-width="1.5"/>
+    
+    <!-- Header Badge -->
+    <rect x="14" y="14" width="307" height="34" rx="7" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+    <text x="167" y="36" font-size="12" font-weight="700" fill="#334155" text-anchor="middle" letter-spacing="0.5">PHASE 3: MULTI-AGENT EXECUTION</text>
+
+    <!-- Lane 1: Action 0 Local SLM -->
+    <rect x="14" y="62" width="307" height="154" rx="8" fill="#ffffff" stroke="#86efac" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="24" y="73" width="75" height="20" rx="4" fill="#dcfce7" stroke="#bbf7d0" stroke-width="1"/>
+    <text x="61" y="87" font-size="10" font-weight="700" fill="#15803d" text-anchor="middle">ACTION 0</text>
+    <text x="108" y="88" font-size="13" font-weight="700" fill="#166534">Local SLM Agent</text>
+    <text x="24" y="111" font-size="11.5" font-weight="600" fill="#334155">Qwen 2.5 1.5B-Instruct (4-bit NF4)</text>
+    <text x="24" y="130" font-size="11" fill="#64748b">• 187 Routine Incidents routed (37.4%)</text>
+    <text x="24" y="148" font-size="11" font-weight="600" fill="#15803d">• Resolution: 95.72% (179/187 solved)</text>
+    <rect x="24" y="162" width="287" height="26" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+    <text x="167" y="179" font-size="11" font-weight="700" fill="#166534" text-anchor="middle">API Token Spend: $0.00000 (Zero Cost)</text>
+
+    <!-- Lane 2: Action 2 Hybrid Orchestrator -->
+    <rect x="14" y="228" width="307" height="175" rx="8" fill="#ffffff" stroke="#38bdf8" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="24" y="239" width="75" height="20" rx="4" fill="#e0f2fe" stroke="#bae6fd" stroke-width="1"/>
+    <text x="61" y="253" font-size="10" font-weight="700" fill="#0369a1" text-anchor="middle">ACTION 2</text>
+    <text x="108" y="254" font-size="13" font-weight="700" fill="#0369a1">Hybrid Orchestrator</text>
+    <text x="24" y="277" font-size="11.5" font-weight="600" fill="#334155">Zero-Cloud-Token Decomposition</text>
+    <text x="24" y="295" font-size="11" fill="#64748b">• Local CPU extracts boilerplate schema</text>
+    <text x="24" y="313" font-size="11" fill="#64748b">• Cloud API solves 50-token abstracted query</text>
+    <text x="24" y="331" font-size="11" font-weight="600" fill="#0284c7">• 185 Moderate Incidents (37.0%) | 95.14% Res</text>
+    <rect x="24" y="345" width="287" height="26" rx="4" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1"/>
+    <text x="167" y="362" font-size="11" font-weight="700" fill="#0284c7" text-anchor="middle">50 in / 50 out tokens ($0.0010/inc, $0.1850 total)</text>
+
+    <!-- Lane 3: Action 1 Cloud Frontier LLM -->
+    <rect x="14" y="415" width="307" height="154" rx="8" fill="#ffffff" stroke="#c084fc" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="24" y="426" width="75" height="20" rx="4" fill="#f3e8ff" stroke="#e9d5ff" stroke-width="1"/>
+    <text x="61" y="440" font-size="10" font-weight="700" fill="#6b21a8" text-anchor="middle">ACTION 1</text>
+    <text x="108" y="441" font-size="13" font-weight="700" fill="#6b21a8">Cloud Frontier LLM</text>
+    <text x="24" y="464" font-size="11.5" font-weight="600" fill="#334155">Commercial Frontier Reasoning API</text>
+    <text x="24" y="482" font-size="11" fill="#64748b">• 128 Critical Incidents routed (25.6%)</text>
+    <text x="24" y="500" font-size="11" font-weight="600" fill="#7c3aed">• Resolution: 96.88% (124/128 solved)</text>
+    <rect x="24" y="513" width="287" height="26" rx="4" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1"/>
+    <text x="167" y="530" font-size="11" font-weight="700" fill="#7c3aed" text-anchor="middle">4,614 in / 28,160 out ($0.4455 total, ≤ $0.05 cap)</text>
+  </g>
+
+  <!-- Connectors P3 -> P4 (Converging) -->
+  <path d="M 965 142 C 990 142, 990 282, 1012 282" stroke="#64748b" stroke-width="2" fill="none"/>
+  <path d="M 965 318 L 1012 318" stroke="#64748b" stroke-width="2" fill="none"/>
+  <path d="M 965 492 C 990 492, 990 354, 1012 354" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrow-slate)"/>
+
+  <!-- ==================== PHASE 4: SAFETY GATE ==================== -->
+  <g transform="translate(1018, 108)">
+    <!-- Outer Card -->
+    <rect width="250" height="585" rx="12" fill="url(#bg-p4)" stroke="#fde68a" stroke-width="1.5"/>
+    
+    <!-- Header Badge -->
+    <rect x="14" y="14" width="222" height="34" rx="7" fill="#fef3c7" stroke="#fcd34d" stroke-width="1"/>
+    <text x="125" y="36" font-size="12" font-weight="700" fill="#92400e" text-anchor="middle" letter-spacing="0.5">PHASE 4: SAFETY GATE</text>
+
+    <!-- Stage 1 De-obfuscator -->
+    <rect x="14" y="62" width="222" height="114" rx="8" fill="#ffffff" stroke="#fcd34d" stroke-width="1" filter="url(#card-shadow)"/>
+    <text x="24" y="85" font-size="12" font-weight="700" fill="#92400e">Stage 1: AST De-obfuscator</text>
+    <text x="24" y="105" font-size="11" fill="#475569">Syntactic Canonicalization:</text>
+    <text x="24" y="123" font-size="10.5" fill="#64748b">• Base64 decode &amp; subshell unpack</text>
+    <text x="24" y="139" font-size="10.5" fill="#64748b">• Variable &amp; octal normalization</text>
+    <text x="24" y="155" font-size="10.5" fill="#64748b">• AST tree canonicalization</text>
+
+    <!-- Arrow 1 -> 2 -->
+    <path d="M 125 176 L 125 198" stroke="#d97706" stroke-width="2" marker-end="url(#arrow-amber)"/>
+
+    <!-- Stage 2 Policy Rules -->
+    <rect x="14" y="200" width="222" height="138" rx="8" fill="#ffffff" stroke="#fcd34d" stroke-width="1" filter="url(#card-shadow)"/>
+    <text x="24" y="223" font-size="12" font-weight="700" fill="#92400e">Stage 2: Policy AST Rules</text>
+    <text x="24" y="243" font-size="11" fill="#475569">Deterministic Invariants:</text>
+    <text x="24" y="261" font-size="10.5" fill="#64748b">• Root destructive cmds (rm -rf /)</text>
+    <text x="24" y="277" font-size="10.5" fill="#64748b">• Raw disk I/O &amp; fork bombs</text>
+    <text x="24" y="293" font-size="10.5" fill="#64748b">• Unscoped kill signals</text>
+    <rect x="22" y="303" width="206" height="22" rx="4" fill="#fef3c7" stroke="#fde68a" stroke-width="1"/>
+    <text x="125" y="318" font-size="10.5" font-weight="700" fill="#92400e" text-anchor="middle">Algorithmic Risk Score R ∈ [0, 100]</text>
+
+    <!-- Arrow 2 -> 3 -->
+    <path d="M 125 338 L 125 362" stroke="#d97706" stroke-width="2" marker-end="url(#arrow-amber)"/>
+
+    <!-- Safety Audit Results -->
+    <rect x="14" y="364" width="222" height="144" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" filter="url(#card-shadow)"/>
+    <text x="24" y="387" font-size="12" font-weight="700" fill="#1e293b">Benchmark Safety Audit</text>
+    <text x="24" y="407" font-size="11" font-weight="700" fill="#15803d">• Attack Interception: 100.0%</text>
+    <text x="34" y="423" font-size="10.5" fill="#64748b">(37 / 37 adversarial payloads)</text>
+    <text x="24" y="441" font-size="11" font-weight="700" fill="#15803d">• False Alarm Rate: 0.0%</text>
+    <text x="34" y="457" font-size="10.5" fill="#64748b">(0 / 463 benign commands)</text>
+    <rect x="22" y="467" width="206" height="24" rx="4" fill="#fef2f2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="125" y="483" font-size="10" font-weight="600" fill="#991b1b" text-anchor="middle">Regex: 59.5% Recall, 17.5% FPR</text>
+
+    <!-- Latency Callout -->
+    <rect x="14" y="520" width="222" height="43" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+    <text x="125" y="546" font-size="11" font-weight="600" fill="#92400e" text-anchor="middle">AST Verification Overhead: &lt; 4 ms</text>
+  </g>
+
+  <!-- Connectors P4 -> Deployment Targets -->
+  <path d="M 1268 282 C 1285 282, 1285 212, 1302 212" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrow-green)"/>
+  <path d="M 1268 454 C 1285 454, 1285 504, 1302 504" stroke="#dc2626" stroke-width="2" fill="none" marker-end="url(#arrow-red)"/>
+
+  <!-- ==================== DEPLOYMENT & ESCALATION TARGETS ==================== -->
+  <g transform="translate(1310, 108)">
+    <!-- Target A: Execute in Cluster -->
+    <rect x="0" y="90" width="245" height="175" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="14" y="104" width="217" height="24" rx="4" fill="#dcfce7" stroke="#bbf7d0" stroke-width="1"/>
+    <text x="122" y="120" font-size="11" font-weight="700" fill="#15803d" text-anchor="middle">POLICY-COMPLIANT (R &lt; 30)</text>
+    
+    <rect x="24" y="138" width="197" height="42" rx="6" fill="#16a34a"/>
+    <text x="122" y="164" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">Execute in Cluster</text>
+    
+    <text x="122" y="200" font-size="11" fill="#475569" text-anchor="middle">Target: Kubernetes / Linux Nodes</text>
+    <text x="122" y="218" font-size="11.5" font-weight="700" fill="#15803d" text-anchor="middle">95.80% ± 0.32% Success (N=500)</text>
+    <text x="122" y="236" font-size="10.5" fill="#64748b" text-anchor="middle">Deterministic Spend: $0.6305</text>
+
+    <!-- Target B: Quarantine & Escalate -->
+    <rect x="0" y="390" width="245" height="175" rx="10" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="14" y="404" width="217" height="24" rx="4" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+    <text x="122" y="420" font-size="11" font-weight="700" fill="#991b1b" text-anchor="middle">HIGH RISK / ATTACK (R ≥ 30)</text>
+    
+    <rect x="24" y="438" width="197" height="42" rx="6" fill="#dc2626"/>
+    <text x="122" y="464" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">Quarantine &amp; Escalate</text>
+    
+    <text x="122" y="500" font-size="11" fill="#475569" text-anchor="middle">Target: Human SRE On-Call</text>
+    <text x="122" y="518" font-size="11.5" font-weight="700" fill="#b91c1c" text-anchor="middle">100% Interception Rate</text>
+    <text x="122" y="536" font-size="10.5" fill="#64748b" text-anchor="middle">Zero Unsafe Cluster Mutations</text>
+  </g>
+
+  <!-- ==================== PHASE 5: CONTINUOUS FEEDBACK LOOP ==================== -->
+  <g transform="translate(45, 715)">
+    <!-- Outer Card -->
+    <rect width="1510" height="200" rx="12" fill="url(#bg-p5)" stroke="#c7d2fe" stroke-width="1.5"/>
+    
+    <!-- Header Banner -->
+    <rect x="14" y="14" width="310" height="32" rx="6" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1"/>
+    <text x="169" y="35" font-size="12" font-weight="700" fill="#5b21b6" text-anchor="middle" letter-spacing="0.5">PHASE 5: CONTINUOUS FEEDBACK LOOP</text>
+    <text x="340" y="35" font-size="12" font-weight="600" fill="#4338ca">Closed-Loop Reinforcement Learning &amp; Autonomous Capability Transfer</text>
+
+    <!-- Sub-Box 1: Reward -->
+    <rect x="14" y="56" width="435" height="126" rx="8" fill="#ffffff" stroke="#ddd6fe" stroke-width="1" filter="url(#card-shadow)"/>
+    <rect x="26" y="66" width="180" height="22" rx="4" fill="#ede9fe"/>
+    <text x="116" y="81" font-size="11" font-weight="700" fill="#5b21b6" text-anchor="middle">1. SCALAR REWARD SIGNAL</text>
+    <text x="26" y="106" font-size="11" font-weight="600" fill="#334155">Discrete Reward Function: r ∈ {+10, +8, +4, −5, −10}</text>
+    <text x="26" y="125" font-size="10.5" fill="#64748b">• +10.0 Local success ($0 cost) | +8.0 Hybrid success (sub-cent)</text>
+    <text x="26" y="141" font-size="10.5" fill="#64748b">• +4.0 Cloud success (paid API) | −5.0 Local fail | −10.0 Cloud fail</text>
+    <text x="26" y="161" font-size="10.5" font-weight="600" fill="#4338ca">Jointly balances resolution precision against commercial API expenditure</text>
+
+    <!-- Sub-Box 2: Terminal Q-Update (Equation 1) -->
+    <rect x="463" y="56" width="530" height="126" rx="8" fill="#ffffff" stroke="#818cf8" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="475" y="66" width="250" height="22" rx="4" fill="#e0e7ff"/>
+    <text x="600" y="81" font-size="11" font-weight="700" fill="#3730a3" text-anchor="middle">2. TERMINAL Q-UPDATE (EQUATION 1)</text>
+    
+    <!-- Exact Terminal Contextual Bandit Formula Matching Equation (1) -->
+    <rect x="475" y="96" width="506" height="34" rx="6" fill="#f8faff" stroke="#c7d2fe" stroke-width="1"/>
+    <text x="728" y="119" font-size="13.5" font-weight="700" fill="#1e1b4b" text-anchor="middle" font-family="'Courier New', Courier, monospace">Q(s, a) ← Q(s, a) + α [ r − Q(s, a) ]</text>
+    
+    <text x="475" y="147" font-size="10.5" font-weight="600" fill="#4338ca">Contextual Bandit Formulation (T = 1, learning rate α = 0.15)</text>
+    <text x="475" y="164" font-size="10" fill="#64748b">*Multi-turn sequential extension: discounted Bellman Q(s, a) ← Q + α[r + γ max Q(s', a') − Q] with γ = 0.85</text>
+
+    <!-- Sub-Box 3: Offline QLoRA Fine-Tuning -->
+    <rect x="1007" y="56" width="489" height="126" rx="8" fill="#ffffff" stroke="#ddd6fe" stroke-width="1" filter="url(#card-shadow)"/>
+    <rect x="1019" y="66" width="260" height="22" rx="4" fill="#ede9fe"/>
+    <text x="1149" y="81" font-size="11" font-weight="700" fill="#5b21b6" text-anchor="middle">3. OFFLINE QLORA FINE-TUNING</text>
+    <text x="1019" y="106" font-size="11" font-weight="600" fill="#334155">Transfer Cloud Competency to Local Qwen SLM</text>
+    <text x="1019" y="125" font-size="10.5" fill="#64748b">• 120 Disjoint synthetic trajectories (rank r=16, 4-bit NF4)</text>
+    <text x="1019" y="143" font-size="11" font-weight="700" fill="#15803d">• Resolution: 83.96% → 95.72% (+11.76 percentage-point improvement)</text>
+    <text x="1019" y="162" font-size="10" fill="#4338ca">McNemar's test: χ² = 18.38, p = 1.80 × 10⁻⁵ &lt; 0.001 (a=156, b=1, c=23, d=7)</text>
+  </g>
+
+  <!-- ==================== RETURN FEEDBACK LOOPS ==================== -->
+  
+  <!-- Return Loop 1: Cluster Execution Outcome -> Phase 5 (Runs around the right edge cleanly) -->
+  <path d="M 1555 240 H 1572 V 696 H 262 V 715" stroke="#ffffff" stroke-width="6" fill="none"/>
+  <path d="M 1555 240 H 1572 V 696 H 262 V 715" stroke="#7c3aed" stroke-width="2.5" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow-purple)"/>
+  
+  <!-- Return Loop 2: Phase 5 Step 2 -> Phase 2 Q-Router Update -->
+  <path d="M 728 715 V 650 H 444 V 564" stroke="#ffffff" stroke-width="6" fill="none"/>
+  <path d="M 728 715 V 650 H 444 V 564" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow-indigo)"/>
+
+  <!-- Return Loop 3: Phase 5 Step 3 -> Phase 3 Local SLM Adapter Update -->
+  <path d="M 1251 715 V 670 H 988 V 230 H 967" stroke="#ffffff" stroke-width="6" fill="none"/>
+  <path d="M 1251 715 V 670 H 988 V 230 H 967" stroke="#16a34a" stroke-width="2.5" stroke-dasharray="6 4" fill="none" marker-end="url(#arrow-green)"/>
+
+</svg>

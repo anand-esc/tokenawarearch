@@ -1,7 +1,10 @@
 import logging
 from .classifier import IncidentClassifier
 from .budgeting import TokenBudgeter
-from src.evaluation.q_learning import QLearningRouter
+try:
+    from src.evaluation.q_learning import QLearningRouter
+except ImportError:
+    from evaluation.q_learning import QLearningRouter
 
 class GlobalDynamicRouter:
     """The central intelligence node for Phase 2.

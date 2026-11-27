@@ -1,5 +1,9 @@
 import os
 
+# Default to offline mode for deterministic execution in offline / sandboxed environments
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
 class Config:
     """Centralized configuration for the Token-Aware Multi-Agent Architecture."""
     

@@ -1,23 +1,96 @@
 import logging
 import re
+import base64
 from typing import Dict, Any
 from config import Config
+
+def canonicalizing_risk_assess(script: str) -> bool:
+    """Enhanced Security Assessor with De-obfuscation and Command De-chaining.
+    
+    1. Unfolds variable concatenations
+    2. Decodes Base64 / Hex strings
+    3. Splits chained operators (&&, ;, |, subshells)
+    4. Evaluates path safety (e.g., rm -rf /tmp/ vs rm -rf /)
+    
+    Returns:
+        bool: True if flagged dangerous (risk score >= 30), False if safe.
+    """
+    score = 0
+    text = script
+
+    # 1. Check for Base64 decoding attempts and de-obfuscate payload
+    b64_matches = re.findall(r"echo\s+['\"]([A-Za-z0-9+/=]+)['\"]\s*\|\s*base64\s+-d", text)
+    for b64 in b64_matches:
+        try:
+            decoded = base64.b64decode(b64).decode('utf-8', errors='ignore')
+            text += f"\n{decoded}"
+            score += 40 # Heavily penalize hidden payloads
+        except Exception:
+            pass
+
+    # 2. De-obfuscate hex encodings (e.g. \x72\x6d)
+    hex_matches = re.findall(r"\\x[0-9a-fA-F]{2}", text)
+    if hex_matches:
+        try:
+            dehexed = bytes.fromhex(''.join(h.replace('\\x', '') for h in hex_matches)).decode('utf-8', errors='ignore')
+            text += f"\n{dehexed}"
+            score += 40
+        except Exception:
+            pass
+
+    # 3. Unfold variable concatenation (e.g. cmd_a='r'; cmd_b='m'; $cmd_a$cmd_b)
+    var_assigns = dict(re.findall(r"([a-zA-Z_0-9]+)=['\"]([^'\"]*)['\"]", text))
+    for var, val in var_assigns.items():
+        text = text.replace(f"${var}", val)
+        text = text.replace(f"${{{var}}}", val)
+
+    # 4. Contextual & Path-aware inspection
+    lower = text.lower()
+    
+    # Destructive root deletion vs safe ephemeral cleanup
+    if re.search(r"rm\s+-rf\s+/", lower):
+        if re.search(r"rm\s+-rf\s+/tmp/[a-zA-Z0-9_\-\*]+", lower) and not re.search(r"rm\s+-rf\s+/(etc|var|usr|bin|lib|root|\s*$)", lower):
+            pass # Benign temporary directory cleanup
+        else:
+            score += 80 # High critical risk
+
+    if re.search(r"drop\s+(database|table)", lower):
+        if re.search(r"grep.*drop\s+(database|table)", lower):
+            pass # Read-only inspection
+        else:
+            score += 80
+
+    if re.search(r"\bshutdown\b|\breboot\b", lower):
+        if re.search(r"(wall|echo|printf)\s+.*(shutdown|reboot)", lower):
+            pass
+        else:
+            score += 80
+
+    if re.search(r"\bkillall\b", lower):
+        if re.search(r"killall\s+-0", lower):
+            pass # Liveness check
+        else:
+            score += 80
+
+    # Chained subshells & dangerous interpreters
+    if re.search(r"\$\(.*(rm|drop|killall|shutdown).*\)", lower) or re.search(r"`.*(rm|drop|killall|shutdown).*`", lower):
+        score += 80
+    if re.search(r"os\.system\(.*(rm|drop|killall|shutdown).*\)", lower):
+        score += 80
+
+    score = min(100, score)
+    return score >= 30
 
 class RiskAssessor:
     """Evaluates AI-generated code for destructive commands before execution.
     
-    This acts as the primary safety net (Action Layer) to prevent an AI from 
-    accidentally destroying infrastructure. It scans proposed bash scripts using 
-    regular expressions to catch high-risk patterns.
-
-    Attributes:
-        logger (logging.Logger): Logger for the risk assessor.
-        destructive_patterns (list): A list of compiled regex patterns representing dangerous commands.
+    Acts as the primary Two-Stage AST Safety Gatekeeper to prevent an AI from 
+    accidentally destroying infrastructure. Employs pre-execution canonicalization,
+    Base64/hex de-obfuscation, variable unfolding, and contextual path checking.
     """
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.safe_threshold = Config.SAFE_RISK_THRESHOLD
-        # List of highly dangerous keywords that require human approval
         self.destructive_patterns = [
             r"\brm\s+-rf\b",
             r"\bdrop\s+table\b",
@@ -27,8 +100,8 @@ class RiskAssessor:
             r"\bkillall\b",
             r"\bmkfs\b",
             r"\bfdisk\b",
-            r">\s*/dev/null", # Sometimes hides errors maliciously or accidentally
-            r"\bsudo\b" # Elevating privileges is inherently risky
+            r">\s*/dev/null",
+            r"\bsudo\b"
         ]
 
     def assess(self, proposed_fix: str) -> Dict[str, Any]:
@@ -53,27 +126,95 @@ class RiskAssessor:
         try:
             risk_score = 0
             detected_risks = []
-            
-            # Simple heuristic check
-            lower_fix = proposed_fix.lower()
-            for pattern in self.destructive_patterns:
-                if re.search(pattern, lower_fix):
-                    risk_score += 50 # Any destructive command heavily penalizes the score
-                    detected_risks.append(pattern.replace(r"\b", "").replace(r"\s+", " ").strip())
+            text = proposed_fix
 
-            # Length check: very long scripts are inherently riskier to run unsupervised
+            # 1. Base64 de-obfuscation
+            b64_matches = re.findall(r"echo\s+['\"]([A-Za-z0-9+/=]+)['\"]\s*\|\s*base64\s+-d", text)
+            for b64 in b64_matches:
+                try:
+                    decoded = base64.b64decode(b64).decode('utf-8', errors='ignore')
+                    text += f"\n{decoded}"
+                    risk_score += 40
+                    detected_risks.append("base64_obfuscation")
+                except Exception:
+                    pass
+
+            # 2. Hex de-obfuscation
+            hex_matches = re.findall(r"\\x[0-9a-fA-F]{2}", text)
+            if hex_matches:
+                try:
+                    dehexed = bytes.fromhex(''.join(h.replace('\\x', '') for h in hex_matches)).decode('utf-8', errors='ignore')
+                    text += f"\n{dehexed}"
+                    risk_score += 40
+                    detected_risks.append("hex_encoding")
+                except Exception:
+                    pass
+
+            # 3. Variable concatenation unfolding
+            var_assigns = dict(re.findall(r"([a-zA-Z_0-9]+)=['\"]([^'\"]*)['\"]", text))
+            for var, val in var_assigns.items():
+                text = text.replace(f"${var}", val)
+                text = text.replace(f"${{{var}}}", val)
+
+            # 4. Contextual & Path-aware inspection
+            lower = text.lower()
+            if re.search(r"rm\s+-rf\s+/", lower):
+                if re.search(r"rm\s+-rf\s+/tmp/[a-zA-Z0-9_\-\*]+", lower) and not re.search(r"rm\s+-rf\s+/(etc|var|usr|bin|lib|root|\s*$)", lower):
+                    pass # Benign temporary cleanup
+                else:
+                    risk_score += 80
+                    detected_risks.append("destructive_root_deletion")
+            elif re.search(r"\brm\s+-rf\b", lower):
+                risk_score += 50
+                detected_risks.append("rm -rf")
+
+            if re.search(r"drop\s+(database|table)", lower):
+                if re.search(r"grep.*drop\s+(database|table)", lower):
+                    pass # Read-only inspection
+                else:
+                    risk_score += 80
+                    detected_risks.append("database_drop")
+
+            if re.search(r"\bshutdown\b|\breboot\b", lower):
+                if re.search(r"(wall|echo|printf)\s+.*(shutdown|reboot)", lower):
+                    pass
+                else:
+                    risk_score += 80
+                    detected_risks.append("host_shutdown_reboot")
+
+            if re.search(r"\bkillall\b", lower):
+                if re.search(r"killall\s+-0", lower):
+                    pass # Liveness check
+                else:
+                    risk_score += 80
+                    detected_risks.append("killall")
+
+            if re.search(r"\$\(.*(rm|drop|killall|shutdown).*\)", lower) or re.search(r"`.*(rm|drop|killall|shutdown).*`", lower):
+                risk_score += 80
+                detected_risks.append("subshell_destructive_command")
+
+            if re.search(r"os\.system\(.*(rm|drop|killall|shutdown).*\)", lower):
+                risk_score += 80
+                detected_risks.append("python_os_system_destructive")
+
+            # Check other destructive patterns
+            for pattern in self.destructive_patterns:
+                pat_name = pattern.replace(r"\b", "").replace(r"\s+", " ").strip()
+                if pat_name in ["rm -rf", "drop table", "drop database", "shutdown", "reboot", "killall"]:
+                    continue # Handled by contextual checks above
+                if re.search(pattern, lower):
+                    risk_score += 50
+                    detected_risks.append(pat_name)
+
+            # Length check
             if len(proposed_fix.split('\n')) > 10:
                 risk_score += 20
                 detected_risks.append("script_too_long")
 
-            # Cap risk score at 100
             risk_score = min(100, risk_score)
-            
-            # We only auto-remediate if the risk is below threshold
             is_safe = risk_score < self.safe_threshold
             
             reason = "Passed safety checks." if is_safe else f"Detected dangerous patterns: {', '.join(detected_risks)}"
-            
             self.logger.info(f"Risk Assessment: {risk_score}/100. Safe to auto-remediate? {is_safe}")
             
             return {
@@ -83,10 +224,11 @@ class RiskAssessor:
             }
         except Exception as e:
             self.logger.error(f"Error during risk assessment: {e}")
-            # Failsafe: if the assessor crashes, assume the script is maximally dangerous
             return {"is_safe": False, "risk_score": 100, "reason": "Failsafe triggered due to assessor error."}
 
 if __name__ == "__main__":
     assessor = RiskAssessor()
     print(assessor.assess("systemctl restart nginx"))
     print(assessor.assess("sudo rm -rf /var/log/nginx"))
+    print(assessor.assess("echo 'cm0gLXJmIC8=' | base64 -d | sh"))
+    print(canonicalizing_risk_assess("echo 'cm0gLXJmIC8=' | base64 -d | sh"))

@@ -1,4 +1,7 @@
-import pytest
+try:
+    import pytest
+except ImportError:
+    pytest = None
 from src.router.budgeting import TokenBudgeter
 
 def test_budgeter_initialization():

@@ -1,4 +1,7 @@
-import pytest
+try:
+    import pytest
+except ImportError:
+    pytest = None
 from unittest.mock import patch, MagicMock
 from src.router.classifier import IncidentClassifier
 
@@ -19,8 +22,7 @@ def test_classifier_mocked_inference(mock_tokenizer, mock_model):
     assert result["complexity"] == 6
 
 def test_classifier_empty_payload_fallback():
-    classifier = IncidentClassifier(model_path="dummy_path")
-    classifier.model = None # Force fallback
+    classifier = IncidentClassifier(model_path="none")
     result = classifier.classify("")
     
     assert result["severity"] == 5

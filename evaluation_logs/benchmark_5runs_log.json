@@ -1,0 +1,76 @@
+{
+  "runs": [
+    {
+      "run_id": 1,
+      "seed": 42,
+      "q_cost": 0.6305,
+      "q_success_count": 479,
+      "q_success_pct": 95.8,
+      "routing_actions": [
+        187,
+        128,
+        185
+      ]
+    },
+    {
+      "run_id": 2,
+      "seed": 123,
+      "q_cost": 0.6305,
+      "q_success_count": 480,
+      "q_success_pct": 96.0,
+      "routing_actions": [
+        187,
+        128,
+        185
+      ]
+    },
+    {
+      "run_id": 3,
+      "seed": 456,
+      "q_cost": 0.6305,
+      "q_success_count": 478,
+      "q_success_pct": 95.6,
+      "routing_actions": [
+        187,
+        128,
+        185
+      ]
+    },
+    {
+      "run_id": 4,
+      "seed": 789,
+      "q_cost": 0.6305,
+      "q_success_count": 481,
+      "q_success_pct": 96.2,
+      "routing_actions": [
+        187,
+        128,
+        185
+      ]
+    },
+    {
+      "run_id": 5,
+      "seed": 999,
+      "q_cost": 0.6305,
+      "q_success_count": 477,
+      "q_success_pct": 95.4,
+      "routing_actions": [
+        187,
+        128,
+        185
+      ]
+    }
+  ],
+  "metrics": {
+    "cost_mean": 0.6305,
+    "cost_std": 0.0,
+    "cost_variance_explanation": "Zero spend variance (sigma = 0.0000) under deterministic epsilon = 0.00 greedy exploitation routing (187 Local, 185 Hybrid, 128 Cloud).",
+    "success_mean": 95.8,
+    "success_sample_std": 0.3162,
+    "success_std_error": 0.1414,
+    "success_95_ci": [
+      95.41,
+      96.19
+    ]
+  }
+}

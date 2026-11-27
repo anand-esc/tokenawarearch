@@ -4,3 +4,15 @@ __pycache__/
 *.pyo
 .env
 .pytest_cache/
+*backup*
+
+# Paper drafts stay private until publication (not downloadable)
+*.docx
+*.docx.*
+Anand_Token_Aware_SRE_Multi_Agent_Architecture.pdf
+research#1/
+*.bak
+# Scripts that edit the paper document
+apply_review_revisions.py
+harmonize_paper.py
+update_paper_500.py

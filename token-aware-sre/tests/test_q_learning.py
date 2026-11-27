@@ -1,4 +1,7 @@
-import pytest
+try:
+    import pytest
+except ImportError:
+    pytest = None
 import numpy as np
 from unittest.mock import patch
 from src.evaluation.q_learning import QLearningRouter

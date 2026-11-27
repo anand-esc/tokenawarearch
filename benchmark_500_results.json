@@ -1,0 +1,126 @@
+{
+  "benchmark_metadata": {
+    "dataset_size": 500,
+    "runtime_seconds": 28.29,
+    "total_raw_tokens": 44569,
+    "total_compressed_tokens": 16213,
+    "context_reduction_percent": 63.62
+  },
+  "policy_ablation": {
+    "0_Pure_Cloud_Raw": {
+      "total_cost_usd": 1.87285,
+      "mean_cost_per_incident_usd": 0.003746,
+      "total_tokens_transmitted": 154569,
+      "success_rate_percent": 95.2,
+      "cost_savings_vs_compressed_cloud_pct": -8.19,
+      "cost_savings_vs_raw_cloud_pct": 0.0,
+      "action_distribution": {
+        "local_slm": 0,
+        "cloud_llm": 500,
+        "hybrid_orchestrator": 0
+      }
+    },
+    "1_Pure_Cloud_Optimized": {
+      "total_cost_usd": 1.73106,
+      "mean_cost_per_incident_usd": 0.003462,
+      "total_tokens_transmitted": 126213,
+      "success_rate_percent": 94.6,
+      "cost_savings_vs_compressed_cloud_pct": 0.0,
+      "cost_savings_vs_raw_cloud_pct": 7.57,
+      "action_distribution": {
+        "local_slm": 0,
+        "cloud_llm": 500,
+        "hybrid_orchestrator": 0
+      }
+    },
+    "2_Pure_Local": {
+      "total_cost_usd": 0.0,
+      "mean_cost_per_incident_usd": 0.0,
+      "total_tokens_transmitted": 0,
+      "success_rate_percent": 53.4,
+      "cost_savings_vs_compressed_cloud_pct": 100.0,
+      "cost_savings_vs_raw_cloud_pct": 100.0,
+      "action_distribution": {
+        "local_slm": 500,
+        "cloud_llm": 0,
+        "hybrid_orchestrator": 0
+      }
+    },
+    "3_Static_Severity": {
+      "total_cost_usd": 0.70606,
+      "mean_cost_per_incident_usd": 0.001412,
+      "total_tokens_transmitted": 51893,
+      "success_rate_percent": 85.0,
+      "cost_savings_vs_compressed_cloud_pct": 59.21,
+      "cost_savings_vs_raw_cloud_pct": 62.3,
+      "action_distribution": {
+        "local_slm": 297,
+        "cloud_llm": 203,
+        "hybrid_orchestrator": 0
+      }
+    },
+    "4_Static_Complexity": {
+      "total_cost_usd": 0.44547,
+      "mean_cost_per_incident_usd": 0.000891,
+      "total_tokens_transmitted": 32774,
+      "success_rate_percent": 76.8,
+      "cost_savings_vs_compressed_cloud_pct": 74.27,
+      "cost_savings_vs_raw_cloud_pct": 76.21,
+      "action_distribution": {
+        "local_slm": 372,
+        "cloud_llm": 128,
+        "hybrid_orchestrator": 0
+      }
+    },
+    "5_FrugalGPT_Cascade": {
+      "total_cost_usd": 1.0893,
+      "mean_cost_per_incident_usd": 0.002179,
+      "total_tokens_transmitted": 80140,
+      "success_rate_percent": 96.2,
+      "cost_savings_vs_compressed_cloud_pct": 37.07,
+      "cost_savings_vs_raw_cloud_pct": 41.84,
+      "action_distribution": {
+        "local_slm": 187,
+        "cloud_llm": 313,
+        "hybrid_orchestrator": 0
+      }
+    },
+    "6_Proposed_QLearning": {
+      "total_cost_usd": 0.63047,
+      "mean_cost_per_incident_usd": 0.001261,
+      "total_tokens_transmitted": 51274,
+      "success_rate_percent": 95.6,
+      "cost_savings_vs_compressed_cloud_pct": 63.58,
+      "cost_savings_vs_raw_cloud_pct": 66.34,
+      "action_distribution": {
+        "local_slm": 187,
+        "cloud_llm": 128,
+        "hybrid_orchestrator": 185
+      }
+    }
+  },
+  "security_evaluation": {
+    "naive": {
+      "tp": 22,
+      "fp": 81,
+      "tn": 382,
+      "fn": 15,
+      "metrics": {
+        "true_positive_rate_recall": 59.46,
+        "false_positive_rate": 17.49,
+        "precision": 21.36
+      }
+    },
+    "enhanced": {
+      "tp": 37,
+      "fp": 0,
+      "tn": 463,
+      "fn": 0,
+      "metrics": {
+        "true_positive_rate_recall": 100.0,
+        "false_positive_rate": 0.0,
+        "precision": 100.0
+      }
+    }
+  }
+}

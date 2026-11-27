@@ -2,11 +2,16 @@ import json
 import sys
 import os
 
-# Add parent directory to path so we can import our modules
+# Add parent directories to path so we can import both token-aware-sre and src modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.router.classifier import IncidentClassifier
-from src.evaluation.q_learning import QLearningRouter
+try:
+    from src.router.classifier import IncidentClassifier
+    from src.evaluation.q_learning import QLearningRouter
+except ImportError:
+    from router.classifier import IncidentClassifier
+    from evaluation.q_learning import QLearningRouter
 
 # Industry Standard Pricing (e.g., GPT-4o / Claude 3.5 Sonnet average)
 COST_PER_1M_INPUT = 5.00
@@ -18,7 +23,14 @@ def run_benchmarks():
     print("======================================================\n")
 
     # Load the strict holdout test set
-    with open('/home/andromeda/Desktop/golden_benchmark_test_set_EXPANDED.json', 'r') as f:
+    possible_paths = [
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../golden_benchmark_500_incidents.json")),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "golden_benchmark_500_incidents.json")),
+    ]
+    benchmark_file = next((p for p in possible_paths if os.path.exists(p)), None)
+    if not benchmark_file:
+        raise FileNotFoundError("Could not find golden benchmark JSON file.")
+    with open(benchmark_file, 'r') as f:
         benchmark_data = json.load(f)
     
     classifier = IncidentClassifier()
@@ -48,8 +60,8 @@ def run_benchmarks():
         compressed_tokens_total += compressed_tokens
 
         # Baseline Cost: No compression, 100% sent to Cloud LLM
-        # Assuming ~250 output tokens for a standard bash script
-        base_cost = ((raw_tokens / 1000000) * COST_PER_1M_INPUT) + ((250 / 1000000) * COST_PER_1M_OUTPUT)
+        # Assuming ~220 output tokens for a standard bash script
+        base_cost = ((raw_tokens / 1000000) * COST_PER_1M_INPUT) + ((220 / 1000000) * COST_PER_1M_OUTPUT)
         baseline_total_cost += base_cost
 
         # 2. Phase 2 & 3: Routing & Execution Stats
@@ -65,7 +77,7 @@ def run_benchmarks():
         elif action == 1:
             route_counts["CLOUD_LLM"] += 1
             # Compressed payload sent to Cloud
-            proposed_cost = ((compressed_tokens / 1000000) * COST_PER_1M_INPUT) + ((250 / 1000000) * COST_PER_1M_OUTPUT)
+            proposed_cost = ((compressed_tokens / 1000000) * COST_PER_1M_INPUT) + ((220 / 1000000) * COST_PER_1M_OUTPUT)
         elif action == 2:
             route_counts["HYBRID_ORCHESTRATOR"] += 1
             # 75% of context handled locally. Only 25% (deep reasoning) sent to cloud. Output script mostly stitched locally.

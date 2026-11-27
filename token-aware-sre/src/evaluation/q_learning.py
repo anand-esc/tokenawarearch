@@ -30,7 +30,7 @@ class QLearningRouter:
         
         # Path to persist the "Brain"
         self.save_path = os.path.join(os.path.dirname(__file__), "q_table.pkl")
-        self.prewarm_path = "/home/andromeda/Desktop/q_table_prewarm_history_EXPANDED.json"
+        self.prewarm_path = os.path.join(os.path.dirname(__file__), "q_table_prewarm_history_EXPANDED.json")
         
         self._load_table()
 
